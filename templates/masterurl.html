@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% block title %}Waste » Url™ » {{ data.0.url }}{% endblock %}
+{% block sidebar %}
+<div class="well sidebar-nav">
+  <ul class="nav nav-list">
+    <li class="nav-header">Pages</li>
+    <li><a href="/">Home</a></li>
+    <li class="active"><a href="/url/">Url</a></li>
+    <li><a href="/rage/">Rage</a></li>
+    <li><a href="/topic/">Topic</a></li>
+  </ul>
+</div><!--/.well -->
+{% endblock %}
+
+{% block content %}
+<h3>{{ data.0.url }}</h3>
+{% for dataitem in data %}
+  <h4><a href="/url/view/{{ dataitem.channelurl.key.id }}/">{{ dataitem.channel }}</a></h4>
+  {{ dataitem.date }}
+
+  +/-: {{ dataitem.rating }}<br>
+  {% for rate in dataitem.rates %}
+    {{ rate }} </br>
+  {% endfor %}
+
+  {% for extra in dataitem.extras %}
+    {{ extra|safe }} </br>
+  {% endfor %}
+
+{% endfor %}
+<hr>
+  </br><a href="{{ data.0.url.url }}">Direct link</a>
+  {% if user %}
+    </br><a
+
+href="/tasks/title?id={{data.0.url.key.id}}&prefix={{user}}&redirect=/">Fetch
+title</a>
+    </br><a
+
+href="/tasks/valid?id={{data.0.url.key.id}}&prefix={{user}}&redirect=/">Check
+url</a>
+  {% endif %}
+{% endblock %}

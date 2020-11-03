@@ -1,0 +1,56 @@
+.rnick { 
+    margin-right: auto;
+    text-align: center;
+    font-size: 133%;
+    font-weight: bold;
+    width: 200px;
+}
+
+.rfaceToLeft { 
+    -moz-transform: scaleX(-1);
+    -o-transform: scaleX(-1);
+    -webkit-transform: scaleX(-1);
+    transform: scaleX(-1);
+    filter: FlipH;
+    -ms-filter: "FlipH";
+
+    /* I love konqueror too, but sadly.. no */
+    -khtml-transform: scaleX(-1);
+}
+
+.rface { 
+    vertical-align: center;
+}
+
+.rcomment { 
+    margin-top: auto;
+    margin-right: 1px;
+    display: inline-block;
+}
+.rsharedWith1 { 
+    width: 400px; 
+}
+
+.rsharedWith2 { 
+    width: 200px;
+}
+.rcommentToRight { 
+    padding-right: 40px;
+}
+.rcommentToLeft { 
+
+}
+
+.rpanel { 
+    width: 450px;
+}
+
+td { 
+    padding: 20px 20px 20px 20px;
+    border: 2px solid;
+    vertical-align: bottom;
+}
+
+table { 
+    border-collapse: collapse;
+}

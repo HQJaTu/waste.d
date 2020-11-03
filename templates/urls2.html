@@ -1,0 +1,17 @@
+{% block content %}
+<div class="jscroll">
+{% include "urls_only.html" %}
+</div>
+{% endblock %}
+
+{% block bodyend %}
+<script src="/js/jquery.jscroll.js"></script>
+<script>
+
+$(function() {
+  $('.jscroll').jscroll({
+    padding: 5
+  });
+});
+</script>
+{% endblock %}

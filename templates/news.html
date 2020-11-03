@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block title %}Waste » News{% endblock %}
+
+{% block sidebar %}
+<div class="well sidebar-nav">
+  <ul class="nav nav-list">
+    <li class="nav-header">Pages</li>
+    <li class="active"><a href="/">Home</a></li>
+    <li><a href="/url/">Url</a></li>
+    <li><a href="/rage/">Rage</a></li>
+    <li><a href="/topic/">Topic</a></li>
+  </ul>
+</div><!--/.well -->
+{% endblock %}
+
+{% block content %}
+  {% for news_item in news %}
+    <p>{{ news_item|safe }}</p>
+  {% endfor %}
+{% endblock %}

@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block css %}
+<link rel="stylesheet" type="text/css" href="/css/rages.css" />
+{% endblock %}
+
+{% block title %}Waste » Rage » {{ title }}{% endblock %}
+
+
+{% block sidebar %}
+Pages
+<ul class="nav nav-sidebar">
+  <li><a href="/">Home</a></li>
+  <li><a href="/url/">Url</a></li>
+  <li class="active"><a href="/rage/">Rage</a></li>
+  <li><a href="/topic/">Topic</a></li>
+</ul>
+
+<div class="panel-group" id="accordion">
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h4 class="panel-title">
+        <a data-toggle="collapse" data-parent="#accordion" href="#collapseRages">
+          Rages
+        </a>
+      </h4>
+    </div>
+    <div id="collapseRages" class="panel-collapse collapse in">
+      <div class="list-group">
+      {% for r in rages %}
+        <a class="list-group-item{% if r.key.id == active %} active{% endif %}" href="/rage/{{ r.key.id }}/">{{ r.title }}</a>
+      {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="panel-group" id="accordion">
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h4 class="panel-title">
+        <a data-toggle="collapse" data-parent="#accordion" href="#collapseOldies">
+          Oldies
+        </a>
+      </h4>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<h2>{{ title }} @ {{ channel }}</h2>
+{{ date|date:"d.m.Y H:i" }}
+<table class="rcomic">
+<tr>
+{% for panel in panels %}
+  {% if forloop.counter|divisibleby:2 %}
+    <div class='rcomment rcommentToLeft rsharedWith2'><div class='rcomments'>
+    <span class='rline'>{{ panel.msg|safe }}</span><br />&nbsp;&nbsp;&nbsp;&nbsp;<b>\</b><br/>
+    </div><img src="/img/rage/{{ panel.face }}.png" class='rface rfaceToLeft' alt='{{ panel.face }}'/>
+    <br /><div class='rnick'>{{ panel.nick }}</div></div>
+    </td>
+    {% if forloop.counter|divisibleby:4 %}
+    </tr>
+    {% endif %}
+  {% else %}
+    {% if forloop.counter|divisibleby:4 %}
+    <tr>
+    {% endif %}
+    <td><div class='rpanel'>
+    <div class='rcomment rcommentToRight rsharedWith2'><div class='rcomments'>
+    <span class='rline'>{{ panel.msg|safe }}</span><br /><b>&nbsp;&nbsp;&nbsp;|</b><br/>
+    </div><img src="/img/rage/{{ panel.face }}.png" class='rface rfaceToRight' alt='{{ panel.face }}'/>
+    <br /><div class='rnick'>{{ panel.nick }}</div></div>
+  {% endif %}
+{% endfor %}
+</tr>
+</table>
+{% endblock %}

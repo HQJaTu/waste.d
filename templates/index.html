@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block title %}Waste{% endblock %}
+
+{% block sidebar %}
+Pages
+<ul class="nav nav-sidebar">
+  <li class="active"><a href="/">Home</a></li>
+  <li><a href="/url/">Url</a></li>
+  <li><a href="/rage/">Rage</a></li>
+  <li><a href="/topic/">Topic</a></li>
+</ul>
+{% endblock %}
+
+{% block content %}
+          <div class="jumbotron">
+            <h1>Ryönälaari</h1>
+            <p>Täältä löytyy Tarantinon (IRC-Bot) keräämiä <a href="/url/">urleja</a>, valikoituja <a href="/rage/">logeja</a> sarjakuvamuodossa ja ehkä jopa kanavien <a href="/topic/">topic:eja</a>.</p>
+            <!-- Button trigger modal -->
+            <p><button class="btn btn-primary btn-lg" data-toggle="modal" data-target="#info">Lisää infoa &raquo;</button></p> 
+
+            <!-- Modal -->
+            <div class="modal fade" id="info" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="myModalLabel">Nope</h4>
+                  </div>
+                  <div class="modal-body">
+                    <img src="static/images/deal_with_it.png" alt="DEAL WITH IT">
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            
+          </div>
+          <div class="row">
+            <div class="col-md-4">
+              <h2>News</h2>
+              {% for news_item in news %}
+              <p>{{ news_item|safe }}</p>
+              {% endfor %}
+              <p><a class="btn btn-default" href="/news">View details &raquo;</a></p>
+            </div><!--/span-->
+            <div class="col-md-4">
+            <h2>Greetings!</h2>
+	    {% for greeting in greetings %}
+              {% if greeting.author %}
+                <b>{{ greeting.author.nickname }}</b> wrote:
+              {% else %}
+                An anonymous person wrote:
+              {% endif %}
+                <blockquote>{{ greeting.content }}</blockquote>
+            {% endfor %}
+            </div><!--/span-->
+            <div class="col-md-4">
+              <h2>Sign Questbook</h2>
+                <form action="/sign?guestbook_name={{ guestbook_name }}" method="post">
+                  <div><textarea name="content" class="form-control" rows="3" required pattern="\S+"></textarea></div>
+                  <div><input type="submit" class="btn btn-default" value="Sign Guestbook"></div>
+                </form>
+                {% if username %}    
+                <hr>
+                       
+                <form>Guestbook name:
+                  <input value="{{ guestbook_name }}" name="guestbook_name" required pattern="\S+">
+                  <input type="submit" class="btn" value="switch">
+                </form>
+                {% endif %} 
+
+            </div><!--/span-->
+          </div><!--/row-->
+{% endblock %}
+

@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% block title %}Waste » Url{% endblock %}
+
+{% block sidebar %}
+Pages
+<ul class="nav nav-sidebar">
+  <li><a href="/">Home</a></li>
+  <li class="active"><a href="/url/">Url</a></li>
+  <li><a href="/rage/">Rage</a></li>
+  <li><a href="/topic/">Topic</a></li>
+</ul>
+
+<div class="panel-group" id="accordion">
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h4 class="panel-title">
+        <a data-toggle="collapse" data-parent="#accordion" href="#collapseDates">
+          Start date
+        </a>
+      </h4>
+    </div>
+    <div id="collapseDates" class="panel-collapse collapse in">
+      <ul class="list-group">
+      {% if channel %}
+        <li class="list-group-item"><a href="/url/channel/{{ channel }}/{{ prev_date|date:"Y-m-d"}}/">{{ prev_date|date:"d.m.Y"}}</a></li>
+        <li class="list-group-item"><a href="/url/channel/{{ channel }}/{{ next_date|date:"Y-m-d"}}/">{{ next_date|date:"d.m.Y"}}</a></li>
+        <li class="list-group-item"><a href="/url/channel/{{ channel }}/">Today</a></li>
+        <li class="list-group-item"><a href="/url/">{{ channel }}</a></li>
+      {% else %}
+        <li class="list-group-item"><a href="/url/{{ prev_date|date:"Y-m-d"}}/">{{ prev_date|date:"d.m.Y"}}</a></li>
+        <li class="list-group-item"><a href="/url/{{ next_date|date:"Y-m-d"}}/">{{ next_date|date:"d.m.Y"}}</a></li>
+        <li class="list-group-item"><a href="/url/">Today</a></li>
+      {% endif %}
+      </ul>
+    </div>
+  </div>
+</div>
+    
+<div class="panel-group" id="accordion">
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h4 class="panel-title">
+        <a data-toggle="collapse" data-parent="#accordion" href="#collapseTags">
+          Tags
+        </a>
+      </h4>
+    </div>
+    <div id="collapseTags" class="panel-collapse collapse">
+      <ul class="list-group">
+        {% for tag in tag_cloud %}
+          <li class="list-group-item"><a href="/url/tag/{{tag.0}}/">{{tag.0}}<span class="badge pull-right">{{tag.1}}</span></a></li>
+        {% empty %}
+          <li class="list-group-item"><a href="/url/">Refresh</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+</div>        
+{% endblock %}
+
+{% block content %}
+<div class="jscroll">
+{% include "urls_only.html" %}
+</div>
+{% endblock %}
+
+{% block bodyend %}
+<script src="/js/jquery.jscroll.js"></script>
+<script>
+
+$(function() {
+  $('.jscroll').jscroll({
+      padding: 5
+  });
+});
+</script>
+{% endblock %}
+

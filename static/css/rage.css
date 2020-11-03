@@ -1,0 +1,61 @@
+body { 
+    background-color: #ffffff;
+    color: #000000;
+}
+
+.nick { 
+    margin-right: auto;
+    text-align: center;
+    font-size: 133%;
+    font-weight: bold;
+    width: 200px;
+}
+
+.faceToLeft { 
+    -moz-transform: scaleX(-1);
+    -o-transform: scaleX(-1);
+    -webkit-transform: scaleX(-1);
+    transform: scaleX(-1);
+    filter: FlipH;
+    -ms-filter: "FlipH";
+
+    /* I love konqueror too, but sadly.. no */
+    -khtml-transform: scaleX(-1);
+}
+
+.face { 
+    vertical-align: center;
+}
+
+.comment { 
+    margin-top: auto;
+    margin-right: 1px;
+    display: inline-block;
+}
+.sharedWith1 { 
+    width: 400px; 
+}
+
+.sharedWith2 { 
+    width: 200px;
+}
+.commentToRight { 
+    padding-right: 40px;
+}
+.commentToLeft { 
+
+}
+
+.panel { 
+    width: 450px;
+}
+
+td { 
+    padding: 20px 20px 20px 20px;
+    border: 2px solid;
+    vertical-align: bottom;
+}
+
+table { 
+    border-collapse: collapse;
+}

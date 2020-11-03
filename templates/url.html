@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block title %}Waste » Url » {{ data.url }}{% endblock %}
+{% block sidebar %}
+<div class="well sidebar-nav">
+  <ul class="nav nav-list">
+    <li class="nav-header">Pages</li>
+    <li><a href="/">Home</a></li>
+    <li class="active"><a href="/url/">Url</a></li>
+    <li><a href="/rage/">Rage</a></li>
+    <li><a href="/topic/">Topic</a></li>
+  </ul>
+</div><!--/.well -->
+{% endblock %}
+
+{% block content %}
+<h3>{{ data.url }}</h3>
+<h4>{{ data.channel }}</h4>
+{{ data.date }}
+
++/-:{{ data.rating }}<br>
+{% for rate in data.rates %}
+  {{ rate }} </br>
+{% endfor %}
+
+{% for extra in data.extras %}
+  {{ extra|safe }} </br>
+{% endfor %}
+
+</br><a href="{{ data.url.url }}">Direct link</a>
+<small>(<a href="http://waste.appspot.com/url/view_m/{{ data.url.key.id }}/">↑</a>)</small>
+{% endblock %}

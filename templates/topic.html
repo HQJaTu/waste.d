@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block title %}Waste » Topics{% endblock %}
+
+{% block sidebar %}
+Pages
+<ul class="nav nav-sidebar">
+  <li><a href="/">Home</a></li>
+  <li><a href="/url/">Url</a></li>
+  <li><a href="/rage/">Rage</a></li>
+  <li class="active"><a href="/topic/">Topic</a></li>
+</ul>
+{% endblock %}
+
+{% block content %}
+{% for topic in topics %}
+  {% ifchanged topic.channel %}
+  <h3>{{ topic.channel }}</h3>
+  {% endifchanged %}
+  <div>{{ topic.date|date:"d.m.Y" }} <b>{{ topic.nick }}</b>: {{ topic }}</div>
+{% endfor %}
+{% endblock %}

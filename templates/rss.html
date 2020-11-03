@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+<channel>
+{% block channel %}
+  <title>{{ channel.title }}</title>
+  <link>{{ channel.link }}</link>
+  <description>{{ channel.description }}</description>
+  <pubDate>{{ channel.pubDate }}</pubDate>
+{% endblock %}
+{% block items %}
+  {% for item in items|dictsortreversed:"pubDate" %}
+  <item>
+    <title>{{ item.title }}</title> 
+    <link>{{ item.link }}</link> 
+    <description>{{ item.description }}</description>
+    <pubDate>{{ item.pubDate }}</pubDate>
+    <category>{{ item.category }}</category>
+    <levenshtein>{{ item.levenshtein }}</levenshtein>
+  </item>
+  {% endfor %}
+{% endblock %}
+ </channel>
+</rss>

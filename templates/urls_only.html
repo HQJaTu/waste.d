@@ -1,0 +1,30 @@
+{% for row in data %}
+  <div><a target="_blank" href="{{ row.url.url }}" title="{{ row.url.loc_title }}">{{ row.url.short }}</a></br>
+  {% for rate in row.rates %}
+    {{ rate }}</br>
+  {% endfor %}
+  {% for extra in row.extras %}
+    {{ extra|safe }}</br>
+  {% endfor %}
+  <small>
+  {% ifchanged row.post.date|date:"d.m.y" %}
+    <b>{{ row.post.date|date:"d.m.y" }} </b>
+  {% else %}
+    &nbsp;&nbsp;
+  {% endifchanged %}
+  {{ row.post.date|date:"H:i" }} 
+  {{ row.post.user }}
+  <a href="/url/channel/{{ row.channel|slugify }}/" title="Filter">{{ row.channel }}</a>
+  (<a href="/url/view/{{ row.channelurl }}/" title="View/edit">{{ row.channelurl }}</a>)
+  </small>
+  </div>
+  <br>
+{% endfor %}
+
+{% if next %}  
+  {% if channel %}
+    <a href="/url/channel/{{ channel }}/{{ date|date:"Y-m-d"}}/{{ next.urlsafe }}">Next >></a>
+  {% else %}
+    <a href="/url/{{ date|date:"Y-m-d"}}/{{ next.urlsafe }}">Next >></a>
+  {% endif %}
+{% endif %}
