@@ -1,0 +1,20 @@
+cron:
+- description: Document update
+  url: /tasks/update_document
+  schedule: every day 22:00
+
+- description: Status check
+  url: /tasks/valid
+  schedule: every 8 hours
+
+- description: Tag Cloud refresh
+  url: /tasks/maintenance?type=tag_cloud
+  schedule: every 5 hours
+
+- description: Weekly cleanup
+  url: /tasks/maintenance?type=cleanup
+  schedule: every monday 03:00
+
+- description: Daily exception report
+  url: /_ereporter?sender=do_not_use@example.com  # The sender must be an app admin.
+  schedule: every day 12:00
