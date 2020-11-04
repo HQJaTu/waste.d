@@ -130,3 +130,8 @@ dmypy.json
 
 #Visual Studio Code
 .vscode/
+# IntelliJ
+.idea/*.iws
+.idea/workspace.xml
+.idea/tasks.xml
+
