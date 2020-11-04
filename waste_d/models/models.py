@@ -1,5 +1,5 @@
-from google.appengine.ext import ndb
-from url_models import Url, ChannelUrl, Extra
+from google.cloud import ndb
+from .url_models import Url, ChannelUrl, Extra
 
 
 class Greeting(ndb.Model):

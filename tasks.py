@@ -11,7 +11,7 @@ import operator
 
 from django.utils.encoding import smart_unicode
 from django.http import HttpResponseRedirect
-from google.appengine.ext import ndb
+from google.cloud import ndb
 
 from google.appengine.api import urlfetch, taskqueue, memcache, mail
 from google.appengine.ext import db, webapp

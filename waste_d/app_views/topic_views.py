@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import cgi
 import os, sys
 import datetime
@@ -7,7 +6,7 @@ import random
 
 from google.appengine.ext.webapp import template
 from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import render_to_response
+from django.shortcuts import render
 import logging
 from google.appengine.api import taskqueue, users, memcache
 from django.utils.encoding import smart_unicode
@@ -23,7 +22,7 @@ def index(request):
     template_values = {
         'topics': topics,
     }
-    return render_to_response('topic.html', template_values)
+    return render('topic.html', template_values)
 
 
 def post(request):

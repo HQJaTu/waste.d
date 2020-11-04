@@ -1,5 +1,5 @@
-from google.appengine.ext import ndb
-from urlparse import urlparse
+from google.cloud import ndb
+from urllib.parse import urlparse
 
 
 class Url(ndb.Model):

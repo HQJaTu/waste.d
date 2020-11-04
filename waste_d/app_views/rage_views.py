@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import cgi
 import os, sys
 import datetime
@@ -8,12 +7,12 @@ import random
 
 from google.appengine.ext.webapp import template
 from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import render_to_response
+from django.shortcuts import render
 import logging
 from google.appengine.api import taskqueue, users, memcache
 
-from rage_models import Rage, Panel
-from models import News
+from waste_d.models.rage_models import Rage, Panel
+from waste_d.models.models import News
 
 
 def index(request, rageid=0):
@@ -58,7 +57,7 @@ def index(request, rageid=0):
         'date': date,
         'active': int(rageid),
     }
-    return render_to_response('rage.html', template_values)
+    return render('rage.html', template_values)
 
 
 def post(request):

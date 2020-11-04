@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import cgi
 import os, sys
 import datetime
@@ -6,7 +5,7 @@ import re
 
 from google.appengine.ext.webapp import template
 from django.http import HttpResponseRedirect
-from django.shortcuts import render_to_response
+from django.shortcuts import render
 import logging
 from google.appengine.api import taskqueue, users, memcache
 from google.appengine.datastore.datastore_query import Cursor
@@ -79,8 +78,9 @@ def index(request, date=None, cursor=None, rss=None, channel_filter=None):
         'channel': channel_filter,
     }
     if cursor:
-        return render_to_response('urls2.html', template_values)
-    return render_to_response('urls.html', template_values)
+        return render('urls2.html', template_values)
+
+    return render('urls.html', template_values)
 
 
 def view(request, urlid):
@@ -105,7 +105,7 @@ def view(request, urlid):
     template_values = {
         'data': data,
     }
-    return render_to_response('url.html', template_values)
+    return render('url.html', template_values)
 
 
 def view_master(request, urlid):
@@ -133,7 +133,8 @@ def view_master(request, urlid):
         'data': data,
         'user': users.get_current_user(),
     }
-    return render_to_response('masterurl.html', template_values)
+
+    return render('masterurl.html', template_values)
 
 
 def tag(request, tag):
@@ -164,7 +165,8 @@ def tag(request, tag):
         'selected_tag': tag,
         'tag_cloud': memcache.get('tag_cloud'),
     }
-    return render_to_response('tags.html', template_values)
+
+    return render('tags.html', template_values)
 
 
 def test(request, a=None, b=None, c=None):
@@ -173,7 +175,8 @@ def test(request, a=None, b=None, c=None):
         'b': b,
         'c': c,
     }
-    return render_to_response('test.html', template_values)
+
+    return render('test.html', template_values)
 
 
 def post(request, post_url, post_channel=None, post_user=None):

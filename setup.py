@@ -10,6 +10,10 @@ setup(
     author_email='',
     description='',
     install_requires=[
-        'Django'
+        'Django',
+        'django-extensions',
+        'google-api-core>=1.19.0',
+        'google-cloud-ndb',
+        'lxml'
     ]
 )

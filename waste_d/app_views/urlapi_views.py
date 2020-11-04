@@ -1,29 +1,27 @@
-# -*- coding: utf-8 -*-
 import cgi
 import os
 import datetime
 import logging
 import re
 import random
-import urllib2
 from lxml import etree
 import re
-from django.utils.encoding import smart_unicode
-from django.utils import simplejson
+from django.utils.encoding import smart_text
+import json
 from google.appengine.api import search
 import string
 import counter
 
 DEFAULT_COUNTER_NAME = 'XXX'
 
-from google.appengine.ext import ndb
+from google.cloud import ndb
 from google.appengine.api import users, urlfetch, images, memcache, mail, taskqueue
 from google.appengine.ext.webapp import template
 from django.http import HttpResponseRedirect, HttpResponse
-from django.shortcuts import render_to_response
+from django.shortcuts import render
 from django.template.context import RequestContext
-from url_models import Url, Channel, ChannelUrl, Post, Rate, Extra
-from models import News
+from waste_d.models.url_models import Url, Channel, ChannelUrl, Post, Rate, Extra
+from waste_d.models.models import News
 
 
 def post(request):
@@ -177,7 +175,7 @@ def post(request):
                 # logging.debug('encoding %s' % (encoding))
                 tree = etree.fromstring(doc, etree.HTMLParser(encoding=encoding))
                 title = tree.find(".//title").text
-                url_title = smart_unicode(re.sub(r'\s+', ' ', title).strip())
+                url_title = smart_text(re.sub(r'\s+', ' ', title).strip())
             except:
                 logging.warning('Title not fetched %s' % (url))
             else:

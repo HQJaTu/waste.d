@@ -2,11 +2,17 @@ import datetime
 from xml.dom import minidom
 from xml.parsers.expat import ExpatError
 from django.http import HttpResponseRedirect
-from django.shortcuts import render_to_response
+from django.shortcuts import render
 
-from google.appengine.api import users
-from google.appengine.ext import ndb
-from models import Greeting, News
+# import google.cloud.logging
+import google.auth.transport.requests
+import google.oauth2.id_token
+from google.cloud import ndb
+#from waste_d.models.models import Greeting, News
+
+import os
+
+HTTP_REQUEST = google.auth.transport.requests.Request()
 
 # We set a parent key on the 'Greetings' to ensure that they are all in the same
 # entity group. Queries across the single entity group will be consistent.
@@ -20,14 +26,17 @@ def guestbook_key(guestbook_name=DEFAULT_GUESTBOOK_NAME):
 
 
 def index(request):
-    if users.get_current_user():
-        url = users.create_logout_url("/")
-        url_linktext = 'Logout'
-        username = users.get_current_user()
-    else:
-        url = users.create_login_url("/")
+    id_token = request.headers['Authorization'].split(' ').pop()
+    claims = google.oauth2.id_token.verify_firebase_token(
+        id_token, HTTP_REQUEST, audience=os.environ.get('GOOGLE_CLOUD_PROJECT'))
+    if not claims:
+        # url = users.create_login_url("/")
         url_linktext = 'Login'
         username = ''
+    else:
+        # url = users.create_logout_url("/")
+        url_linktext = 'Logout'
+        username = claims.get('email', 'Unknown')
 
     # if 'guestbook_name' in request.GET:
     guestbook_name = request.GET.get('guestbook_name', DEFAULT_GUESTBOOK_NAME)
@@ -53,7 +62,7 @@ def index(request):
         'guestbook_name': guestbook_name,
         'news': news,
     }
-    return render_to_response('index.html', template_values)
+    return render('index.html', template_values)
 
 
 def sign(request):
@@ -83,6 +92,6 @@ def news(request, rss=None):
         'news': news,
     }
     if rss:
-        return render_to_response('news_rss.html', template_values, mimetype="application/xml")
+        return render('news_rss.html', template_values, mimetype="application/xml")
     else:
-        return render_to_response('news.html', template_values)
+        return render('news.html', template_values)

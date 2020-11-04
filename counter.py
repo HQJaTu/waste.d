@@ -1,7 +1,7 @@
 import random
 
 from google.appengine.api import memcache
-from google.appengine.ext import ndb
+from google.cloud import ndb
 
 
 SHARD_KEY_TEMPLATE = 'shard-{}-{:d}'
