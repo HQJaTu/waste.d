@@ -1,2 +1,2 @@
 # waste.d
-Google Appengine UrlLogget etc. service
+Google Appengine UrlLogger etc. service
