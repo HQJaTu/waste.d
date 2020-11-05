@@ -32,8 +32,8 @@ urlpatterns = [
     re_path(r'^url/', include(url_patterns)),
     re_path(r'^rage/', include(rage_patterns)),
     re_path(r'^topic/', include(topic_patterns)),
-    #re_path(r'^sign.*$', 'views.sign'),
-    #re_path(r'^news/(?P<rss>.*).*$', 'views.news'),
-    #re_path(r'^news.*$', 'views.news'),
+    re_path(r'^sign.*$', views.sign),
+    re_path(r'^news/(?P<rss>.*).*$', views.news),
+    re_path(r'^news.*$', views.news),
     re_path(r'^.*$', views.index),
 ]

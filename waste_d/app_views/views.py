@@ -8,7 +8,7 @@ from django.shortcuts import render
 import google.auth.transport.requests
 import google.oauth2.id_token
 from google.cloud import ndb
-#from waste_d.models.models import Greeting, News
+from waste_d.models.models import Greeting, News
 
 import os
 
