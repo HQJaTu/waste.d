@@ -1,6 +1,7 @@
 import random
 
-from google.appengine.api import memcache
+# XXX ToDo: google.appengine
+#from google.appengine.api import memcache
 from google.cloud import ndb
 
 

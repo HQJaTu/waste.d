@@ -1,7 +1,8 @@
 from django.urls import path, include, re_path
+from waste_d.app_views import rage_views
 
-urlpatterns = ['',
-               (r'post/$', 'rage_views.post'),
-               (r'(?P<rageid>.*)/$', 'rage_views.index'),
-               (r'', 'rage_views.index'),
-               ]
+urlpatterns = [
+    re_path(r'post/$', rage_views.post),
+    re_path(r'(?P<rageid>.*)/$', rage_views.index),
+    re_path(r'', rage_views.index),
+]

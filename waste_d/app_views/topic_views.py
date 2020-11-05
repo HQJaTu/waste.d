@@ -4,16 +4,17 @@ import datetime
 import re
 import random
 
-from google.appengine.ext.webapp import template
+# XXX ToDo: google.appengine
+#from google.appengine.ext.webapp import template
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 import logging
-from google.appengine.api import taskqueue, users, memcache
-from django.utils.encoding import smart_unicode
-from django.utils import simplejson
+#from google.appengine.api import taskqueue, users, memcache
+from django.utils.encoding import smart_text
+import json
 
-from topic_models import Topic
-from models import News
+from waste_d.models.topic_models import Topic
+from waste_d.models.models import News
 
 
 def index(request):

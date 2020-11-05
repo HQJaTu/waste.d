@@ -9,7 +9,7 @@ from lxml import etree
 import re
 import operator
 
-from django.utils.encoding import smart_unicode
+from django.utils.encoding import smart_text
 from django.http import HttpResponseRedirect
 from google.cloud import ndb
 
@@ -258,7 +258,7 @@ class TitleTask(webapp.RequestHandler):
                     tree = etree.fromstring(doc, etree.HTMLParser(encoding='utf-8'))
                 title = tree.find(".//title").text
                 logging.debug('title %s' % (title))
-                url.title = smart_unicode(re.sub(r'\s+', ' ', title).strip())
+                url.title = smart_text(re.sub(r'\s+', ' ', title).strip())
                 # except:
                 #  logging.debug('TitleTask: title not fetched %s' % (post_url))
                 # url.title = post_url

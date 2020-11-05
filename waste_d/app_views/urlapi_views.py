@@ -8,15 +8,16 @@ from lxml import etree
 import re
 from django.utils.encoding import smart_text
 import json
-from google.appengine.api import search
+# XXX ToDo: google.appengine
+#from google.appengine.api import search
 import string
-import counter
+from waste_d.counter import *
 
 DEFAULT_COUNTER_NAME = 'XXX'
 
 from google.cloud import ndb
-from google.appengine.api import users, urlfetch, images, memcache, mail, taskqueue
-from google.appengine.ext.webapp import template
+#from google.appengine.api import users, urlfetch, images, memcache, mail, taskqueue
+#from google.appengine.ext.webapp import template
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render
 from django.template.context import RequestContext

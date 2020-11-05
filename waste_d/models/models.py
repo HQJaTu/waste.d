@@ -10,9 +10,12 @@ class Greeting(ndb.Model):
 
 
 class News(ndb.Model):
-    content = ndb.StringProperty(indexed=False)
-    link = ndb.StringProperty(indexed=False)
-    link_text = ndb.StringProperty(indexed=False)
+    # Note:
+    # A StringProperty must be indexed. Previously setting ``indexed=False`` was allowed,
+    # but this usage is no longer supported.
+    content = ndb.StringProperty(indexed=True)
+    link = ndb.StringProperty(indexed=True)
+    link_text = ndb.StringProperty(indexed=True)
     date = ndb.DateTimeProperty(auto_now_add=True)
 
     def __unicode__(self):

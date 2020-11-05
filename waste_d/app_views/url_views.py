@@ -3,14 +3,15 @@ import os, sys
 import datetime
 import re
 
-from google.appengine.ext.webapp import template
+# XXX ToDo: google.appengine
+#from google.appengine.ext.webapp import template
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 import logging
-from google.appengine.api import taskqueue, users, memcache
-from google.appengine.datastore.datastore_query import Cursor
+#from google.appengine.api import taskqueue, users, memcache
+#from google.appengine.datastore.datastore_query import Cursor
 
-from url_models import Url, Channel, ChannelUrl, Post, Rate, Extra
+from waste_d.models.url_models import Url, Channel, ChannelUrl, Post, Rate, Extra
 
 
 def index(request, date=None, cursor=None, rss=None, channel_filter=None):

@@ -12,6 +12,7 @@ setup(
     install_requires=[
         'Django',
         'django-extensions',
+        'google-cloud-core',
         'google-api-core>=1.19.0',
         'google-cloud-ndb',
         'lxml'
