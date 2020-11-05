@@ -134,4 +134,5 @@ dmypy.json
 .idea/*.iws
 .idea/workspace.xml
 .idea/tasks.xml
-
+# Credentials
+Waste-Google-service-account-credentials.json
