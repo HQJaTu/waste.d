@@ -1,7 +1,7 @@
 import cgi
 import os
 import datetime
-import logging
+import google.cloud.logging
 import re
 import random
 from lxml import etree

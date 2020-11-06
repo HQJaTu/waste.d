@@ -8,7 +8,7 @@ import random
 #from google.appengine.ext.webapp import template
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
-import logging
+import google.cloud.logging
 #from google.appengine.api import taskqueue, users, memcache
 from django.utils.encoding import smart_text
 import json

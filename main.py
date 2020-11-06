@@ -11,7 +11,7 @@ import django.core.signals
 import django.db
 import django.dispatch.dispatcher
 
-import logging
+import google.cloud.logging
 from google.appengine.ext import ereporter
 
 ereporter.register_logger()

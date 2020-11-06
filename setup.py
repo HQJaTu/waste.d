@@ -15,6 +15,8 @@ setup(
         'google-cloud-core',
         'google-api-core>=1.19.0',
         'google-cloud-ndb',
-        'lxml'
+        'google-cloud-logging',
+        'lxml',
+        'gunicorn>=20.0.4',
     ]
 )

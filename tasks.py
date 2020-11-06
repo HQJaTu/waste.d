@@ -2,7 +2,7 @@
 import os
 import sys
 import string
-import logging
+import google.cloud.logging
 import datetime
 import urllib2
 from lxml import etree

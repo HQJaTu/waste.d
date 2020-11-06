@@ -4,7 +4,7 @@ from xml.parsers.expat import ExpatError
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 
-# import google.cloud.logging
+import google.cloud.logging
 import google.auth.transport.requests
 import google.oauth2.id_token
 from google.cloud import ndb
@@ -20,15 +20,14 @@ HTTP_REQUEST = google.auth.transport.requests.Request()
 DEFAULT_GUESTBOOK_NAME = 'default_guestbook'
 
 
-def guestbook_key(guestbook_name=DEFAULT_GUESTBOOK_NAME):
-    """Constructs a Datastore key for a Guestbook entity with guestbook_name."""
-    return ndb.Key('Guestbook', guestbook_name)
-
-
 def index(request):
-    id_token = request.headers['Authorization'].split(' ').pop()
-    claims = google.oauth2.id_token.verify_firebase_token(
-        id_token, HTTP_REQUEST, audience=os.environ.get('GOOGLE_CLOUD_PROJECT'))
+    if 'Authorization' in request.headers:
+        id_token = request.headers['Authorization'].split(' ').pop()
+        claims = google.oauth2.id_token.verify_firebase_token(
+            id_token, HTTP_REQUEST, audience=os.environ.get('GOOGLE_CLOUD_PROJECT'))
+    else:
+        claims = None
+
     if not claims:
         # url = users.create_login_url("/")
         url_linktext = 'Login'
@@ -49,20 +48,27 @@ def index(request):
     # a slight chance that Greeting that had just been written would not
     # show up in a query.
     greetings_query = Greeting.query(
-        ancestor=guestbook_key(guestbook_name)).order(-Greeting.date)
+        ancestor=_guestbook_key(guestbook_name)
+    ).order(-Greeting.date)
     greetings = greetings_query.fetch(10)
 
-    news = News.query().order(-News.date).fetch(5)
+    last_5_news = News.query().order(-News.date).fetch(5)
 
     template_values = {
-        'url': url,
+        'url': '',
         'url_linktext': url_linktext,
         'username': username,
         'greetings': greetings,
         'guestbook_name': guestbook_name,
-        'news': news,
+        'news': last_5_news,
     }
-    return render('index.html', template_values)
+
+    return render(request, 'index.html', template_values)
+
+
+def _guestbook_key(guestbook_name=DEFAULT_GUESTBOOK_NAME):
+    """Constructs a Datastore key for a Guestbook entity with guestbook_name."""
+    return ndb.Key('Guestbook', guestbook_name)
 
 
 def sign(request):
@@ -72,7 +78,7 @@ def sign(request):
     # should be limited to ~1/second.
     guestbook_name = request.GET.get('guestbook_name', DEFAULT_GUESTBOOK_NAME)
 
-    greeting = Greeting(parent=guestbook_key(guestbook_name))
+    greeting = Greeting(parent=_guestbook_key(guestbook_name))
 
     if users.get_current_user():
         greeting.author = users.get_current_user()
