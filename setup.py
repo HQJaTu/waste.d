@@ -16,6 +16,7 @@ setup(
         'google-api-core>=1.19.0',
         'google-cloud-ndb',
         'google-cloud-logging',
+        'google-cloud-secret-manager',
         'lxml',
         'gunicorn>=20.0.4',
     ]

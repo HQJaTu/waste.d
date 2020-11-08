@@ -6,8 +6,7 @@ ENV APP_HOME /waste_d
 WORKDIR $APP_HOME
 
 # Install dependencies.
-COPY requirements.txt .
-RUN pip install -r requirements.txt
+RUN pip install install -e .
 
 # Copy local code to the container image.
 COPY . .

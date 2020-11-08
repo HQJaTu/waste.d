@@ -24,6 +24,7 @@ $ gcloud services enable vpcaccess.googleapis.com
 $ gcloud services enable dns.googleapis.com
 $ gcloud services enable datastore.googleapis.com
 $ gcloud services enable cloudbuild.googleapis.com
+$ gcloud services enable secretmanager.googleapis.com
 ```
 
 # VPC
@@ -62,8 +63,9 @@ Go to Project's _API & API settings_, _Credentials_, _Service Accounts_.
 * Service account: _New service account_
 * Service account name: `<your choice>`
 * Roles:
-** _Cloud Run Invoker_
-** _Datastore User_
+  * _Cloud Run Invoker_
+  * _Datastore User_
+  * _Secret Manager Secret Accessor_
 * Service account ID: `<default is ok>`
 * Key Type: _JSON_
 
@@ -109,6 +111,19 @@ Wait for `state: CREATING` to change into `state: READY`.
 Describe single index:
 ```bash
 $ gcloud datastore indexes describe <-one-of-your-indexes->
+```
+
+# Secrets Manager
+
+## Create Django SECRET_KEY
+Install apg:
+```bash
+$ sudo apt-get install apg
+```
+
+Generate a random password of 50 characters, and store it:
+```bash
+$ apg -n 1 -a 1 -m 50 | gcloud secrets create "django-secret_key" --data-file=-
 ```
 
 # Python:

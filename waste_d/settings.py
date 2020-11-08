@@ -10,7 +10,9 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 
+import os
 from pathlib import Path
+from google.cloud import secretmanager
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -18,8 +20,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '5$@gda)8xg0cc84y%+y=-8vm%jvszwy#0_5&_zcf32ox$mb*w='
+# Create the Secret Manager client.
+client = secretmanager.SecretManagerServiceClient()
+secret_path = "projects/%s/secrets/%s/versions/latest" % (os.environ['GOOGLE_CLOUD_PROJECT'], 'django-secret_key')
+response = client.access_secret_version(request={"name": secret_path})
+SECRET_KEY = response.payload.data.decode("UTF-8")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
