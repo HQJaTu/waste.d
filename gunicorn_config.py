@@ -4,7 +4,13 @@ import os
 # webserver, with one worker process and 8 threads.
 # For environments with multiple CPU cores, increase the number of workers
 # to be equal to the cores available.
-port = 8000 # See: Dockerfile PORT=
+
+# See: Dockerfile PORT=
+if "PORT" in os.environ:
+    port = int(os.environ['PORT'])
+else:
+    port = 8000
+
 bind = "0.0.0.0:%d" % port
 workers = 1
 threads = 8

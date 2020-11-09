@@ -2,11 +2,11 @@
 # https://hub.docker.com/_/python
 FROM python:3.8-slim
 
-ENV APP_HOME /waste_d
+ENV APP_HOME /wasted_django
 WORKDIR $APP_HOME
 
 # Copy local code to the container image.
-COPY waste_d waste_d
+COPY waste_d waste_d/
 COPY static .
 COPY manage.py .
 COPY gunicorn_config.py .

@@ -195,8 +195,9 @@ $ gcloud container images add-tag \
 ## Deploy
 Update running image or create new Google Cloud Run service:
 ```bash
-gcloud run deploy django-cloudrun --platform managed --region europe-north1 \
+gcloud run deploy waste-d --platform managed --region europe-north1 \
   --image gcr.io/$GOOGLE_CLOUD_PROJECT/waste.d:latest \
+  --port 8000 \
   --allow-unauthenticated
 ```
 
