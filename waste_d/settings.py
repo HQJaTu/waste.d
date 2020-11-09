@@ -13,6 +13,9 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 import os
 from pathlib import Path
 from google.cloud import secretmanager
+import logging
+
+log = logging.getLogger(__name__)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -32,6 +35,9 @@ DEBUG = True
 ALLOWED_HOSTS = []
 if "GCP_RUN_HOST" in os.environ:
     ALLOWED_HOSTS.append(os.environ['GCP_RUN_HOST'])
+    log.info("Adding '%s' as an allowed host" % os.environ['GCP_RUN_HOST'])
+else:
+    log.warning("No known hosts found! (See env var GCP_RUN_HOST.)")
 
 # Application definition
 
