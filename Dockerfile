@@ -6,7 +6,7 @@ ENV APP_HOME /waste_d
 WORKDIR $APP_HOME
 
 # Copy local code to the container image.
-COPY waste_d .
+COPY waste_d waste_d
 COPY static .
 COPY manage.py .
 COPY gunicorn_config.py .

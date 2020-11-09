@@ -166,6 +166,8 @@ $ GOOGLE_CLOUD_PROJECT=waste-007 \
 ```
 
 # Container
+Note: Installing Google Cloud SDK on local machine is recommended.
+Instructions are at https://cloud.google.com/sdk/docs/install#rpm
 
 ## Trigger new build
 ```bash
@@ -173,12 +175,25 @@ $ gcloud builds submit --tag gcr.io/$GOOGLE_CLOUD_PROJECT/waste.d
 ```
 
 ## List images
+List of all images:
 ```bash
 $ gcloud container images list
 ```
 
+List of tags of an image:
+```bash
+$ gcloud container images list-tags gcr.io/$GOOGLE_CLOUD_PROJECT/waste.d
+```
+
+## Promote a build result into latest:
+```bash
+$ gcloud container images add-tag \
+  gcr.io/$GOOGLE_CLOUD_PROJECT/waste.d:<SHA-1 of image here> \
+  gcr.io/$GOOGLE_CLOUD_PROJECT/waste.d:latest
+```
+
 ## Deploy
-Create new Google Cloud Run service
+Update running image or create new Google Cloud Run service:
 ```bash
 gcloud run deploy django-cloudrun --platform managed --region europe-north1 \
   --image gcr.io/$GOOGLE_CLOUD_PROJECT/waste.d:latest \
@@ -201,3 +216,13 @@ In GCP console:
 1. Done!
 
 Now a new Docker-image is built on every push.
+
+## Local testing of an image
+
+1. Install Google Cloud SDK
+1. `CLOUDSDK_PYTHON=python2 gcloud auth login`
+1. `CLOUDSDK_PYTHON=python2 gcloud auth configure-docker`
+
+Now you can pull:
+
+`CLOUDSDK_PYTHON=python2 docker pull gcr.io/$GOOGLE_CLOUD_PROJECT/waste.d`
