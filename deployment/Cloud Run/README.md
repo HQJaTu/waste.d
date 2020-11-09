@@ -126,6 +126,25 @@ Generate a random password of 50 characters, and store it:
 $ apg -n 1 -a 1 -m 50 | gcloud secrets create "django-secret_key" --data-file=-
 ```
 
+# Cloud Storage
+
+## Create bucket
+To serve static resources over HTTP, create a bucket:
+```bash
+$ gsutil mb -l europe-north1 -c nearline -b on gs://waste-static
+```
+
+Make bucket accessibly by general public of the Internet:
+```bash
+$ gsutil iam ch allUsers:objectViewer gs://waste-static/
+```
+
+## Rsync `static/` to Cloud Bucket
+**Note**: Make sure to affix the slash. This way rsync will copy **contents** of the directory.
+```bash
+$ gsutil rsync -r static/ gs://waste-static/
+```
+
 # Python:
 
 ## Create

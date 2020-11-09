@@ -37,7 +37,7 @@ if "GCP_RUN_HOST" in os.environ:
     ALLOWED_HOSTS.append(os.environ['GCP_RUN_HOST'])
     log.info("Adding '%s' as an allowed host" % os.environ['GCP_RUN_HOST'])
 else:
-    log.warning("No known hosts found! (See env var GCP_RUN_HOST.)")
+    log.warning("No known hosts defined! (See env var GCP_RUN_HOST.)")
 
 # Application definition
 
@@ -122,7 +122,12 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 MEDIA_URL = None
-STATIC_URL = '/static/'
-STATICFILES_DIRS = [
-    "%s/static" % BASE_DIR,
-]
+if "GCP_STATIC_URL" in os.environ:
+    STATIC_URL = os.environ['GCP_STATIC_URL']
+    log.info("Serving static files from: %s" % STATIC_URL)
+else:
+    log.info("Serving static files from Django")
+    STATIC_URL = '/static/'
+    STATICFILES_DIRS = [
+        "%s/static" % BASE_DIR,
+    ]
