@@ -184,3 +184,20 @@ gcloud run deploy django-cloudrun --platform managed --region europe-north1 \
   --image gcr.io/$GOOGLE_CLOUD_PROJECT/django-test \
   --allow-unauthenticated
 ```
+
+## Connect to a GitHub repository
+In GCP console:
+1. Cloud Build
+1. _Triggers_
+1. _Connect Repository_
+  1. Select your source: _GitHub (Cloud Build GitHub App)_
+1. In GitHub, Install Google Cloud Build application
+   * Disclaimer:
+     I understand that GitHub content for the selected repositories will be transferred to this GCP project to provide the connected service.
+     Members of this GCP project with sufficient permissions will be able to create and run triggers on these repositories, based on transferred GitHub content.
+     I also understand that content from all GitHub app triggers in this GCP project may be transferred to GitHub in order to provide functionality like showing trigger names in GitHub build results.
+     This will apply to all existing and future GitHub App triggers in this project.
+1. Create Push Trigger
+1. Done!
+
+Now a new Docker-image is built on every push.

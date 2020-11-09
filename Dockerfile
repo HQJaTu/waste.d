@@ -5,11 +5,15 @@ FROM python:3.8-slim
 ENV APP_HOME /waste_d
 WORKDIR $APP_HOME
 
+# Copy local code to the container image.
+COPY waste_d .
+COPY static .
+COPY manage.py .
+COPY gunicorn_config.py .
+COPY setup.py .
+
 # Install dependencies.
 RUN pip install install -e .
-
-# Copy local code to the container image.
-COPY . .
 
 # Service must listen to $PORT environment variable.
 # This default value facilitates local development.
