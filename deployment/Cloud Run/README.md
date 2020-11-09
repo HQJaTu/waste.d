@@ -187,7 +187,7 @@ $ gcloud container images list-tags gcr.io/$GOOGLE_CLOUD_PROJECT/waste.d
 
 ## Promote a build result into latest:
 ```bash
-$ gcloud container images add-tag \
+$ gcloud container images add-tag --quiet \
   gcr.io/$GOOGLE_CLOUD_PROJECT/waste.d:<SHA-1 of image here> \
   gcr.io/$GOOGLE_CLOUD_PROJECT/waste.d:latest
 ```
@@ -201,7 +201,8 @@ gcloud run deploy waste-d --platform managed --region europe-north1 \
   --allow-unauthenticated \
   --service-account <service-account@created-earlier> \
   --update-env-vars GOOGLE_CLOUD_PROJECT=$GOOGLE_CLOUD_PROJECT \
-  --update-env-vars GCP_RUN_HOST=<waste-d-something-lz.a.run.app>
+  --update-env-vars GCP_RUN_HOST=<waste-d-something-lz.a.run.app> \
+  --update-env-vars DJANGO_ENV=production
 ```
 
 Docs: https://cloud.google.com/sdk/gcloud/reference/run/deploy

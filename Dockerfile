@@ -23,5 +23,9 @@ ENV PORT 8000
 # promptly appear in Cloud Logging.
 ENV PYTHONUNBUFFERED TRUE
 
+# Security: Non-root execution of gunicorn
+RUN adduser --disabled-password --uid 999 app-user
+USER app-user
+
 # Run the web service on container startup. Here we use the gunicorn webserver
 ENTRYPOINT ["gunicorn", "--config", "gunicorn_config.py", "waste_d.wsgi:application"]
