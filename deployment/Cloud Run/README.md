@@ -214,13 +214,14 @@ $ gcloud container images add-tag --quiet \
 ## Deploy: Create Cloud Run service
 Create a new Google Cloud Run service with given image:
 ```bash
-gcloud run deploy waste-d --platform managed --region europe-north1 \
+gcloud run deploy waste-d \
+  --platform managed --region europe-north1 \
   --image gcr.io/$GOOGLE_CLOUD_PROJECT/waste.d:latest \
   --port 8000 \
   --allow-unauthenticated \
   --service-account <service-account@created-earlier> \
   --update-env-vars GOOGLE_CLOUD_PROJECT=$GOOGLE_CLOUD_PROJECT \
-  --update-env-vars GCP_RUN_HOST=<waste-d-something-lz.a.run.app> \
+  --update-env-vars GCP_RUN_HOSTS=<waste-d-something-lz.a.run.app> \
   --update-env-vars DJANGO_ENV=production
 ```
 
@@ -229,7 +230,8 @@ Docs: https://cloud.google.com/sdk/gcloud/reference/run/deploy
 ## Deploy: Update image
 Update running image:
 ```bash
-gcloud run deploy waste-d --platform managed --region europe-north1 \
+gcloud run deploy waste-d \
+  --platform managed --region europe-north1 \
   --image gcr.io/$GOOGLE_CLOUD_PROJECT/waste.d:latest
 ```
 
@@ -259,3 +261,42 @@ Now a new Docker-image is built on every push.
 Now you can pull:
 
 `CLOUDSDK_PYTHON=python2 docker pull gcr.io/$GOOGLE_CLOUD_PROJECT/waste.d`
+
+# Custom domain setup with complimentary TLS-certificate
+
+## Verify the domain
+Docs: https://cloud.google.com/identity/docs/verify-domain
+
+List verified domains:
+```bash
+$ gcloud domains list-user-verified
+```
+
+## Map domain to a Google Cloud Run service
+```bash
+$ gcloud beta run domain-mappings create \
+  --platform managed --region europe-north1 \
+  --service waste-d \
+  --domain <your own domain>
+```
+
+Output:
+```bash
+Waiting for certificate provisioning. You must configure your DNS records for certificate issuance to begin.
+NAME     RECORD TYPE  CONTENTS
+waste-d  A            x4.y4.z4.å4
+waste-d  A            x4.y4.z4.å4
+waste-d  A            x4.y4.z4.å4
+waste-d  A            x4.y4.z4.å4
+waste-d  AAAA         2001:x6:y6:z6::15
+waste-d  AAAA         2001:x6:y6:z6::15
+waste-d  AAAA         2001:x6:y6:z6::15
+waste-d  AAAA         2001:x6:y6:z6::15
+```
+
+## Add records to DNS
+That's something you need to figure out yourself!
+
+## Wait
+An automated system in Google will verify DNS-records.
+When set ok, mapping will go green and a TLS-certificate will be issued to the domain.

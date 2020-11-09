@@ -33,11 +33,11 @@ SECRET_KEY = response.payload.data.decode("UTF-8")
 DEBUG = True
 
 ALLOWED_HOSTS = []
-if "GCP_RUN_HOST" in os.environ:
-    ALLOWED_HOSTS.append(os.environ['GCP_RUN_HOST'])
-    log.info("Adding '%s' as an allowed host" % os.environ['GCP_RUN_HOST'])
+if "GCP_RUN_HOSTS" in os.environ:
+    ALLOWED_HOSTS.extend(os.environ['GCP_RUN_HOSTS'].split(','))
+    log.info("Adding '%s' as an allowed host" % os.environ['GCP_RUN_HOSTS'])
 else:
-    log.warning("No known hosts defined! (See env var GCP_RUN_HOST.)")
+    log.warning("No known hosts defined! (See env var GCP_RUN_HOSTS.)")
 
 # Application definition
 
