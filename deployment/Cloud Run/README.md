@@ -192,13 +192,25 @@ $ gcloud container images add-tag \
   gcr.io/$GOOGLE_CLOUD_PROJECT/waste.d:latest
 ```
 
-## Deploy
-Update running image or create new Google Cloud Run service:
+## Deploy: Create Cloud Run service
+Create a new Google Cloud Run service with given image:
 ```bash
 gcloud run deploy waste-d --platform managed --region europe-north1 \
   --image gcr.io/$GOOGLE_CLOUD_PROJECT/waste.d:latest \
   --port 8000 \
-  --allow-unauthenticated
+  --allow-unauthenticated \
+  --service-account <service-account@created-earlier> \
+  --update-env-vars GOOGLE_CLOUD_PROJECT=$GOOGLE_CLOUD_PROJECT \
+  --update-env-vars GCP_RUN_HOST=<waste-d-something-lz.a.run.app>
+```
+
+Docs: https://cloud.google.com/sdk/gcloud/reference/run/deploy
+
+## Deploy: Update image
+Update running image:
+```bash
+gcloud run deploy waste-d --platform managed --region europe-north1 \
+  --image gcr.io/$GOOGLE_CLOUD_PROJECT/waste.d:latest
 ```
 
 ## Connect to a GitHub repository
