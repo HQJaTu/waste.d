@@ -2,13 +2,26 @@
 Google Appengine UrlLogger etc. service
 
 ## Local development
+See `README.md` in `deployment/Cloud Run` for more details.
 
 ### Run
+Define environment variables:
+* `GOOGLE_CLOUD_PROJECT` to contain the GCP Project ID
+* `GOOGLE_APPLICATION_CREDENTIALS` to point to the JSON-file containing app credentials.
+* (optional) `GCP_RUN_HOSTS` to contain a comma-separated list of allowed hosts
+
+#### localhost
+With defaults:
 ```bash
 ./manage.py runserver
 ```
-
 Server is at http://127.0.0.1:8000/
+
+#### non-localhost access
+Specify network interface:
+```bash
+./manage.py runserver 192.168.0.5:8000
+```
 
 ### List of all known URLs
 Run:

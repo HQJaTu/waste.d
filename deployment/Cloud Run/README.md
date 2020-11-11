@@ -172,6 +172,7 @@ $ source venv/bin/activate
 Define environment variables:
 * `GOOGLE_CLOUD_PROJECT` to contain the GCP Project ID
 * `GOOGLE_APPLICATION_CREDENTIALS` to point to the JSON-file containing app credentials.
+* (optional) `GCP_RUN_HOSTS` to contain a comma-separated list of allowed hosts
 
 ```bash
 $ python3 ./manage.py runserver
