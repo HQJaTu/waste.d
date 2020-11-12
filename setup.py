@@ -12,6 +12,9 @@ setup(
     install_requires=[
         'Django',
         'django-extensions',
+        'djangorestframework',
+        'django-mysql',
+        'mysqlclient',
         'google-cloud-core',
         'google-api-core>=1.19.0',
         'google-cloud-ndb',

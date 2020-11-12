@@ -25,6 +25,8 @@ $ gcloud services enable dns.googleapis.com
 $ gcloud services enable datastore.googleapis.com
 $ gcloud services enable cloudbuild.googleapis.com
 $ gcloud services enable secretmanager.googleapis.com
+$ gcloud services enable sqladmin.googleapis.com
+$ gcloud services enable servicenetworking.googleapis.com
 ```
 
 # VPC
@@ -56,6 +58,22 @@ $ gcloud compute networks vpc-access connectors create \
   --region europe-north1 \
   --range 10.10.248.0/28
 ```
+
+## Create peerings
+Needed:
+* Cloud SQL
+* Service networking
+```bash
+$ gcloud compute networks peerings create \
+  cloudsql-mysql-googleapis-com \
+  --network=waste-vpc \
+  --peer-project=speckle-umbrella-60
+$ gcloud compute networks peerings create \
+  servicenetworking-googleapis-com \
+  --network=waste-vpc \
+  --peer-project=l866559daaa2d5754p-tp
+```
+
 
 # Create service account credentials
 Go to Project's _API & API settings_, _Credentials_, _Service Accounts_.
@@ -121,9 +139,11 @@ Install apg:
 $ sudo apt-get install apg
 ```
 
-Generate a random password of 50 characters, and store it:
+Generate a random password of 50 characters, and store it without trailing newline:
 ```bash
-$ apg -n 1 -a 1 -m 50 | gcloud secrets create "django-secret_key" --data-file=-
+$ apg -n 1 -a 1 -m 50 | \
+  tr -d '\n' | \
+  gcloud secrets create "django-secret_key" --data-file=-
 ```
 
 # Cloud Storage
@@ -220,6 +240,7 @@ gcloud run deploy waste-d \
   --image gcr.io/$GOOGLE_CLOUD_PROJECT/waste.d:latest \
   --port 8000 \
   --allow-unauthenticated \
+  --vpc-connector=waste-to-vpc \
   --service-account <service-account@created-earlier> \
   --update-env-vars GOOGLE_CLOUD_PROJECT=$GOOGLE_CLOUD_PROJECT \
   --update-env-vars GCP_RUN_HOSTS=<waste-d-something-lz.a.run.app> \

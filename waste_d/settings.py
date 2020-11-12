@@ -25,6 +25,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Create the Secret Manager client.
 client = secretmanager.SecretManagerServiceClient()
+
+# Get the Django secrect key
 secret_path = "projects/%s/secrets/%s/versions/latest" % (os.environ['GOOGLE_CLOUD_PROJECT'], 'django-secret_key')
 response = client.access_secret_version(request={"name": secret_path})
 SECRET_KEY = response.payload.data.decode("UTF-8")
@@ -49,6 +51,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_extensions',
+    'rest_framework',
+    'rest_framework.authtoken',
 ]
 
 MIDDLEWARE = [
@@ -85,7 +89,23 @@ WSGI_APPLICATION = 'waste_d.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 
-DATABASES = {}
+secret_path = "projects/%s/secrets/%s/versions/latest" % (os.environ['GOOGLE_CLOUD_PROJECT'], 'mysql-app-user')
+response = client.access_secret_version(request={"name": secret_path})
+mysql_hostname = '68.171.228.35.bc.googleusercontent.com'
+mysql_database = 'waste.d'
+mysql_user = 'wappd'
+mysql_password = response.payload.data.decode("UTF-8")
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'HOST': mysql_hostname,
+        'USER': mysql_user,
+        'PASSWORD': mysql_password,
+        'NAME': mysql_database,
+    }
+}
+
 
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators
@@ -104,6 +124,12 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+    ],
+}
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.1/topics/i18n/
