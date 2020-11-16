@@ -6,11 +6,15 @@ ENV APP_HOME /wasted_django
 WORKDIR $APP_HOME
 
 # Copy local code to the container image.
+COPY wasted_project wasted_project/
 COPY waste_d waste_d/
 COPY static .
 COPY manage.py .
 COPY gunicorn_config.py .
 COPY setup.py .
+
+# Install packages needed by dependencies.
+RUN apt-get -y install default-libmysqlclient-dev
 
 # Install dependencies.
 RUN pip install install -e .
@@ -28,4 +32,4 @@ RUN adduser --disabled-password --uid 999 app-user
 USER app-user
 
 # Run the web service on container startup. Here we use the gunicorn webserver
-ENTRYPOINT ["gunicorn", "--config", "gunicorn_config.py", "waste_d.wsgi:application"]
+ENTRYPOINT ["gunicorn", "--config", "gunicorn_config.py", "wasted_project.wsgi:application"]
