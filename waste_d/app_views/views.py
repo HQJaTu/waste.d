@@ -98,6 +98,6 @@ def news(request, rss=None):
         'news': news,
     }
     if rss:
-        return render('news_rss.html', template_values, mimetype="application/xml")
+        return render('news_rss.html', template_values, content_type="application/xml")
     else:
         return render('news.html', template_values)

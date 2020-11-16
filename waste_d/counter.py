@@ -1,15 +1,12 @@
 import random
 
-# XXX ToDo: google.appengine
-#from google.appengine.api import memcache
 from google.cloud import ndb
-
-
-SHARD_KEY_TEMPLATE = 'shard-{}-{:d}'
 
 
 class GeneralCounterShardConfig(ndb.Model):
     """Tracks the number of shards for each named counter."""
+
+    SHARD_KEY_TEMPLATE = 'shard-{%s}-{%d}'
     num_shards = ndb.IntegerProperty(default=2)
 
     @classmethod
@@ -24,7 +21,7 @@ class GeneralCounterShardConfig(ndb.Model):
                 counter shards that could exist.
         """
         config = cls.get_or_insert(name)
-        shard_key_strings = [SHARD_KEY_TEMPLATE.format(name, index)
+        shard_key_strings = [GeneralCounterShardConfig.SHARD_KEY_TEMPLATE % (name, index)
                              for index in range(config.num_shards)]
         return [ndb.Key(GeneralCounterShard, shard_key_string)
                 for shard_key_string in shard_key_strings]
@@ -53,6 +50,7 @@ def get_count(name):
             if counter is not None:
                 total += counter.count
         memcache.add(name, total, 60)
+
     return total
 
 
@@ -77,7 +75,7 @@ def _increment(name, num_shards):
         num_shards: How many shards to use.
     """
     index = random.randint(0, num_shards - 1)
-    shard_key_string = SHARD_KEY_TEMPLATE.format(name, index)
+    shard_key_string = GeneralCounterShardConfig.SHARD_KEY_TEMPLATE % (name, index)
     counter = GeneralCounterShard.get_by_id(shard_key_string)
     if counter is None:
         counter = GeneralCounterShard(id=shard_key_string)

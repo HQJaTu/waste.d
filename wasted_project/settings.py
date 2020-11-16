@@ -53,6 +53,8 @@ INSTALLED_APPS = [
     'django_extensions',
     'rest_framework',
     'rest_framework.authtoken',
+    # Own ones:
+    'waste_d.apps.WastedConfig',
 ]
 
 MIDDLEWARE = [
@@ -66,7 +68,7 @@ MIDDLEWARE = [
     'waste_d.datastore.cloud-ndb.django_middleware.ndb_django_middleware'
 ]
 
-ROOT_URLCONF = 'waste_d.urls'
+ROOT_URLCONF = 'wasted_project.urls'
 
 TEMPLATES = [
     {
@@ -84,7 +86,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'waste_d.wsgi.application'
+WSGI_APPLICATION = 'wasted_project.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases

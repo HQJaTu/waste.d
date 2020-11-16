@@ -37,7 +37,7 @@ def post(request):
     if request.method == "POST":
         logging.debug('raw_post_data %s' % (request.raw_post_data))
         try:
-            data = simplejson.loads(request.raw_post_data)
+            data = json.loads(request.raw_post_data)
             logging.debug('data %s' % (data))
             topic = data.get('topic')
             channel = data.get('channel')
@@ -61,4 +61,5 @@ def post(request):
                 News(content='Topic', link_text='%s @ %s' % (topic, channel), link='/topic/').put()
 
     logging.debug('Return: %s' % (retval))
-    return HttpResponse(simplejson.dumps(retval), mimetype="application/json")
+
+    return HttpResponse(json.dumps(retval), content_type="application/json")

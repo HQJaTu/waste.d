@@ -175,7 +175,8 @@ $ cd waste.d/
 $ virtualenv venv
 $ source venv/bin/activate
 $ pip freeze > requirements.txt
-$ django-admin startproject waste_d .
+$ django-admin startproject wasted_project .
+$ ./manage.py startapp waste_d
 ```
 
 Quit virtual environment:

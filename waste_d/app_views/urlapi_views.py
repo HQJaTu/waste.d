@@ -1,31 +1,20 @@
-import cgi
-import os
 import datetime
 import logging
 import re
-import random
-from lxml import etree
-import re
-from django.utils.encoding import smart_text
 import json
 import string
-from waste_d.counter import *
 
-DEFAULT_COUNTER_NAME = 'XXX'
 
-from google.cloud import ndb
 from django.http import HttpResponseRedirect, HttpResponse
-from django.shortcuts import render
-from django.template.context import RequestContext
-from django.template.defaulttags import csrf_token
-from django.utils.decorators import method_decorator
 from rest_framework.views import APIView
 from rest_framework import authentication, permissions
 from django.views.decorators.cache import cache_page, never_cache
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
+from rest_framework.decorators import parser_classes
+from rest_framework.parsers import JSONParser
 from waste_d.models.url_models import Url, Channel, ChannelUrl, Post, Rate, Extra
-from waste_d.models.models import News
+from waste_d.entities.url import UrlLogic
 
 logger = logging.getLogger(__name__)
 
@@ -35,9 +24,8 @@ class API(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     @never_cache
+    @parser_classes((JSONParser,))
     def post(self, request):
-        today = datetime.date.today()
-        now = datetime.datetime.now()
 
         url = None
         url_title = None
@@ -53,231 +41,31 @@ class API(APIView):
         old_user = None
         old_date = None
 
-        if request.method == "POST":
-            try:
-                data = simplejson.loads(request.raw_post_data)
-
-                url = data.get('url')
-                channel = data.get('channel').lower()
-                user = data.get('user')
-                line = data.get('line')
-                date = datetime.datetime.strptime(data.get('date'), '%Y%m%d%H%M')
-                logging.debug('date: %s, user: %s, channel: %s, url: %s, line: %s' % (date, user, channel, url, line))
-            except Exception as e:
-                logging.warning('Error %s' % (e))
-        if not url:
-            retval = simplejson.dumps({'id': 0, 'title': ''})
-            return HttpResponse(retval, mimetype="application/json")
-
-        orig_url = url
-        # Add http:// when needed
-        if not url.lower().startswith('http'):
-            url = 'http://' + url
-        # logging.info('Url/API/Post: Channel=%s User=%s Url=%s' % (channel,user,url))
-
-        # Fetch url (async):
-        #  a) check statuscode LATER
-        #  b) get title LATER
-        rpc = urlfetch.create_rpc()
-        urlfetch.make_fetch_call(rpc, url, allow_truncated=True)
-
-        # Get url from DB:
-        #  a) already exists
-        #  b) ChannelCheck
-        # 1. tarkista onko olemassa jo ko. Url, lisää jos ei, muuten päivitä (udate, valid?): valid-juttu joo ehkä jos tarpeen, ei muuten
-        urlquery = Url.query(Url.url == url)
-        urlinstance = urlquery.get()
-        if not urlinstance:
-            urlinstance = Url(url=url)
-            urlinstance.put()
-            # logging.debug('New url %s' % (url))
-        else:
-            logging.info('Old url %s' % (url))
-
-        # 2. tarkista onko olemassa jo ko. Channel, lisää jos ei
-        channelquery = Channel.query(Channel.name == channel)
-        channelinstance = channelquery.get()
-        if not channelinstance:
-            if channel.startswith('#'):
-                private = False
-            else:
-                private = True
-            channelinstance = Channel(name=channel, private=private)
-            channelinstance.put()
-            logging.info('New channel %s' % (channel))
-
-        # 3. tarkista onko url jo olemassa channel-tasolla
-        channelurlquery = ChannelUrl.query(ChannelUrl.url == urlinstance.key, ChannelUrl.channel == channelinstance.key)
-        channelurlinstance = channelurlquery.get()
-        if not channelurlinstance:
-            l = list(string.ascii_uppercase)
-            l.append('Z')
-
-            DEFAULT_COUNTER_NAME = chr(now.isocalendar()[0] - 2010 + 65) + l[(now.isocalendar()[1] - 1) / 2]
-            # logging.debug('DEFAULT_COUNTER_NAME: %s' % (DEFAULT_COUNTER_NAME))
-
-            counter.increment(DEFAULT_COUNTER_NAME)
-            key_name = DEFAULT_COUNTER_NAME + str(counter.get_count(DEFAULT_COUNTER_NAME))
-            # logging.debug('key_name %s' % (key_name))
-
-            channelurlinstance = ChannelUrl(id=key_name, channel=channelinstance.key, url=urlinstance.key)
-            channelurlinstance.put()
-            # logging.debug('New channelurl %s/%s' % (channel,url))
-        else:
-            # logging.info('OLDIE! %s %s' % (channelurlinstance.channel.name,channelurlinstance.url.url))
-            logging.info('Old channelurl %s %s' % (channel, url))
-            old_url = True
-            old_post = Post.query(Post.channelurl == channelurlinstance.key).order(Post.date).get()
-            try:
-                old_date = old_post.date.strftime("%d.%m.%y %H:%M")
-            except:
-                try:
-                    old_date = old_post.idate.strftime("%d.%m.%y %H:%M")
-                except:
-                    old_date = ''
-            old_user = old_post.user
-
-        # 4. Lisätään postaus (tarkistetaan ettei ole jo)
-        postquery = Post.query(Post.channelurl == channelurlinstance.key, Post.user == user, Post.date == date)
-        postinstance = postquery.get()
-        if postinstance:
-            logging.info('Old post; channel: %s, url: %s, user: %s' % (channel, url, user))
-        else:
-            postinstance = Post(channelurl=channelurlinstance.key, user=user, date=date)
-            postinstance.put()
-
-            # 5. extrat
-            # Comment
-            if orig_url != line:
-                comment = line.replace(orig_url, '<url>')
-                # logging.debug('Line: %s, url: %s, comment: %s' % (line,orig_url,comment))
-
-                # TODO:
-                # <url>/
-                # Tyhjät kommentit: ''
-                if comment not in ['<url>/', '']:
-                    Extra(user=user, comment=comment, channelurl=channelurlinstance.key).put()
-                else:
-                    comment = None
-
-        # Resolve async calls
-        # Urlfetch
         try:
-            result = rpc.get_result()
-            if result and result.content_was_truncated:
-                logging.debug('Truncated')
-                tags = 'truncated'
-                Extra(user='Tarantino', tag=tags, channelurl=channelurlinstance.key).put()
-            if result and result.status_code:
-                urlinstance.status = str(result.status_code)
-                urlinstance.last_check = datetime.datetime.now()
-            if result.status_code == 200:
-                urlinstance.valid = 2
-                try:
-                    # Fetch title
-                    req = urllib2.Request(url)
-                    # logging.debug('req %s' % (req))
-                    req.add_header('User-agent',
-                                   'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)')
-                    res = urllib2.urlopen(req)
-                    # logging.debug('res %s' % (res))
-                    doc = res.read()
-                    # logging.debug('doc %s' % (doc))
-                    encoding = res.headers.getparam('charset')
-                    # logging.debug('encoding %s' % (encoding))
-                    tree = etree.fromstring(doc, etree.HTMLParser(encoding=encoding))
-                    title = tree.find(".//title").text
-                    url_title = smart_text(re.sub(r'\s+', ' ', title).strip())
-                except:
-                    logging.warning('Title not fetched %s' % (url))
-                else:
-                    # logging.debug('Url: %s, title %s' % (url,title))
-                    urlinstance.title = url_title
-                # except:
-                #  logging.debug('TitleTask: title not fetched %s' % (url))
-                # urlinstance.title = url
-
-            else:
-                if urlinstance.valid > -5:
-                    urlinstance.valid = urlinstance.valid - 1
-                else:
-                    logging.info('Broken url: %s' % (url))
-            urlinstance.put()
-            # logging.debug('URL %s saved (status code %s).' % (url,str(result.status_code)))
-        except (urlfetch.DownloadError, urlfetch.DeadlineExceededError, urlfetch.InternalTransientError):
-            # Request timed out or failed.
-            # ...
-            urlinstance.valid = urlinstance.valid - 1
-            urlinstance.put()
-            logging.warning('Urlfetch \'%s\' failed.' % (url))
-
-        # Update News
-        if channelinstance.private == False and date.date() >= today:
-            try:
-                news = News(content='Link')
-                news.link = url
-                news.link_text = url_title or url
-                news.put()
-                # logging.debug('News updated')
-            except:
-                logging.warning('News update failed')
-        else:
-            logging.info('News not updated, private channel/old url')
-
-        if not url_title:
-            url_title = ''.join(url.split('/')[-1:])
-        # logging.debug('Title: %s' % (url_title))
-
-        # Create Document (FullTextSearch)
-        doc_id = str(urlinstance.key.id())
-        try:
-            doc = search.Document(doc_id=doc_id, fields=[
-                search.TextField(name='channel', value=channel),
-                search.TextField(name='user', value=user),
-                search.TextField(name='url', value=url),
-                search.DateField(name='date', value=date),
-                search.TextField(name='title', value=url_title),
-                search.TextField(name='comment', value=comment, language='fi'),
-                search.TextField(name='tag', value=tags, language='fi'),
-                search.NumberField(name='rate', value=0)
-            ], language='en')
+            url = request.data.get('url')
+            channel = request.data.get('channel').lower()
+            user = request.data.get('user')
+            line = request.data.get('line')
+            date = datetime.datetime.strptime(request.data.get('date'), '%Y%m%d%H%M')
+            logging.debug('date: %s, user: %s, channel: %s, url: %s, line: %s' % (date, user, channel, url, line))
         except Exception as e:
-            logging.error('Error %s' % (e))
-        # logging.debug('Document fields updated')
+            logging.warning('Error %s' % e)
 
-        if urlinstance.document_date:
-            try:
-                taskqueue.add(name=doc_id + '_post', queue_name='document', url='/tasks/update_document',
-                              params={'doc_id': doc_id})
-            except taskqueue.TombstonedTaskError:
-                logging.warning('TombstonedTaskError %s_post' % (doc_id))
-            except taskqueue.TaskAlreadyExistsError:
-                logging.warning('TaskAlreadyExistsError %s_post' % (doc_id))
-            except:
-                logging.critical('Something weird happened')
+        if not url:
+            retval = json.dumps({'id': 0, 'title': ''})
 
-        try:
-            search.Index(name='url').put(doc)
-            urlinstance.document_date = datetime.datetime.now()
-            urlinstance.put()
-        except search.Error:
-            logging.warning('Create Document failed.')
-            try:
-                taskqueue.add(name=doc_id + '_retry', queue_name='document', url='/tasks/update_document',
-                              params={'doc_id': doc_id})
-            except taskqueue.TombstonedTaskError:
-                logging.warning('TombstonedTaskError %s_retry' % (doc_id))
-            except taskqueue.TaskAlreadyExistsError:
-                logging.warning('TaskAlreadyExistsError %s_retry' % (doc_id))
-            except:
-                logging.critical('Something weird happened, again?')
+            return HttpResponse(retval, content_type="application/json")
+
+        urllogic = UrlLogic(url, channel, user, date, line)
+        channelurlinstance = urllogic.get()
 
         # Finally: return status and/or title (+something)
         logging.info('Returning id: %s, title: %s, old: %s' % (channelurlinstance.key.id(), url_title, old_url))
-        retval = simplejson.dumps(
+        retval = json.dumps(
             {'id': channelurlinstance.key.id(), 'title': url_title, 'old': old_url, 'old_user': old_user,
              'old_date': old_date})
-        return HttpResponse(retval, mimetype="application/json")
+
+        return HttpResponse(retval, content_type="application/json")
 
     def info(self, request):
         today = datetime.date.today()
@@ -292,13 +80,13 @@ class API(APIView):
         url = None
         if request.method == "POST":
             try:
-                data = simplejson.loads(request.raw_post_data)
+                data = json.loads(request.raw_post_data)
 
                 id = str(data.get('id', '')).upper()
                 url = data.get('url', '')
                 logging.debug('id: %s/url: %s' % (id, url))
             except Exception as e:
-                logging.warning('Error %s' % (e))
+                logging.warning('Error %s' % e)
         try:
             id = int(id)
             if id < 1000:
@@ -314,6 +102,7 @@ class API(APIView):
                 # logging.debug('%s' % id)
             elif re.match(pattern2, id):
                 id = id + str(counter.get_count(id))
+
         channelurl = ChannelUrl.get_by_id(id)
         if channelurl:
             url = channelurl.url.get().url
@@ -323,12 +112,12 @@ class API(APIView):
             posts = channelurl.posts()
             channel = channelurl.channel.get().name
 
-            retval = simplejson.dumps(
+            retval = json.dumps(
                 {'id': channelurl.key.id(), 'url': url, 'title': url_title, 'rate': rate, 'extra': extra,
                  'posts': posts})
         else:
-            retval = simplejson.dumps({'id': 0})
-        return HttpResponse(retval, mimetype="application/json")
+            retval = json.dumps({'id': 0})
+        return HttpResponse(retval, content_type="application/json")
 
     def find(self, request):
         idx = ''
@@ -340,7 +129,7 @@ class API(APIView):
 
         if request.method == "POST":
             try:
-                data = simplejson.loads(request.raw_post_data)
+                data = json.loads(request.raw_post_data)
 
                 channel = data.get('channel', '*').lower()
                 content = data.get('content', '')
@@ -357,8 +146,8 @@ class API(APIView):
             except Exception as e:
                 logging.warning('Error %s' % (e))
         # if not content:
-        #  retval=simplejson.dumps([{'id':0,'title': ''}])
-        #  return HttpResponse(retval, mimetype="application/json")
+        #  retval=json.dumps([{'id':0,'title': ''}])
+        #  return HttpResponse(retval, content_type="application/json")
 
         try:
             # Set query options
@@ -423,8 +212,8 @@ class API(APIView):
             logging.exception('Search failed')
 
         # logging.debug('retval %s' % (retval))
-        retvaljson = simplejson.dumps(retval)
-        return HttpResponse(retvaljson, mimetype="application/json")
+        retvaljson = json.dumps(retval)
+        return HttpResponse(retvaljson, content_type="application/json")
 
     def rate(self, request):
         id = 0
@@ -433,7 +222,7 @@ class API(APIView):
 
         if request.method == "POST":
             try:
-                data = simplejson.loads(request.raw_post_data)
+                data = json.loads(request.raw_post_data)
 
                 id = data.get('id').upper()
                 user = data.get('user')
@@ -449,8 +238,8 @@ class API(APIView):
             pass
         channelurl = ChannelUrl.get_by_id(id)
         if not channelurl:
-            retval = simplejson.dumps({'id': 0, 'rate': ''})
-            return HttpResponse(retval, mimetype="application/json")
+            retval = json.dumps({'id': 0, 'rate': ''})
+            return HttpResponse(retval, content_type="application/json")
         else:
             rate = Rate(user=user, value=value, channelurl=channelurl.key)
             rate.put()
@@ -490,8 +279,8 @@ class API(APIView):
             except search.Error:
                 logging.exception('Create/Update Document failed.')
 
-            retval = simplejson.dumps({'id': id, 'rate': channelurl.rating()})
-            return HttpResponse(retval, mimetype="application/json")
+            retval = json.dumps({'id': id, 'rate': channelurl.rating()})
+            return HttpResponse(retval, content_type="application/json")
 
     def extra(self, request):
         id = '0'
@@ -502,7 +291,7 @@ class API(APIView):
 
         if request.method == "POST":
             try:
-                data = simplejson.loads(request.raw_post_data)
+                data = json.loads(request.raw_post_data)
 
                 id = data.get('id').upper()
                 user = data.get('user')
@@ -519,8 +308,8 @@ class API(APIView):
             pass
         channelurl = ChannelUrl.get_by_id(id)
         if not channelurl:
-            retval = simplejson.dumps({'id': 0, 'extra': ''})
-            return HttpResponse(retval, mimetype="application/json")
+            retval = json.dumps({'id': 0, 'extra': ''})
+            return HttpResponse(retval, content_type="application/json")
         else:
             if type == 'comment':
                 Extra(user=user, comment=value, channelurl=channelurl.key).put()
@@ -579,5 +368,6 @@ class API(APIView):
             except search.Error:
                 logging.exception('Create/Update Document failed.')
 
-            retval = simplejson.dumps({'id': id, type: value})
-            return HttpResponse(retval, mimetype="application/json")
+            retval = json.dumps({'id': id, type: value})
+
+            return HttpResponse(retval, content_type="application/json")

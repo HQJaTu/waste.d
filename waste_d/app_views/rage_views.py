@@ -141,4 +141,5 @@ def post(request):
         retval = {'id': 0, 'title': 'error: %s' % (error)}
 
     logging.debug('Return: %s' % (retval))
-    return HttpResponse(json.dumps(retval), mimetype="application/json")
+
+    return HttpResponse(json.dumps(retval), content_type="application/json")

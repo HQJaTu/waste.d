@@ -101,7 +101,7 @@ Running migrations:
   Applying sessions.0001_initial... OK
 ```
 
-# Django
+# Django users
 
 ## Super(l)user
 ```bash
@@ -132,4 +132,20 @@ Auth token:
 $ GOOGLE_CLOUD_PROJECT=waste-007 \
   GOOGLE_APPLICATION_CREDENTIALS=Waste-Google-service-account-credentials.json \
   python3 manage.py drf_create_token eggdrop
+```
+
+# Django SQL-tables
+
+## Create code for ORM migrations
+```bash
+$ GOOGLE_CLOUD_PROJECT=waste-007 \
+  GOOGLE_APPLICATION_CREDENTIALS=Waste-Google-service-account-credentials.json \
+  python3 manage.py makemigrations
+```
+
+## Migrate SQL
+```bash
+$ GOOGLE_CLOUD_PROJECT=waste-007 \
+  GOOGLE_APPLICATION_CREDENTIALS=Waste-Google-service-account-credentials.json \
+  python3 manage.py makemigrations
 ```

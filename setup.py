@@ -22,5 +22,6 @@ setup(
         'google-cloud-secret-manager',
         'lxml',
         'gunicorn>=20.0.4',
+        'requests',
     ]
 )
