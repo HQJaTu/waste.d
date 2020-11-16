@@ -14,7 +14,7 @@ COPY gunicorn_config.py .
 COPY setup.py .
 
 # Install packages needed by dependencies.
-RUN apt-get update && apt-get -y install default-libmysqlclient-dev
+RUN apt-get update && apt-get -y install default-libmysqlclient-dev build-essential
 
 # Install dependencies.
 RUN pip install install -e .
