@@ -78,6 +78,11 @@ class ChannelUrl(ndb.Model):
         return value
 
     def extras(self, plain=False):
+        """
+        XXX HTML here!
+        :param plain:
+        :return:
+        """
         xtra = ''
         extras = Extra.query(Extra.channelurl == self.key)
         for extra in extras:
@@ -156,6 +161,10 @@ class Extra(ndb.Model):
     udate = ndb.DateTimeProperty(auto_now=True)
 
     def __str__(self):
+        """
+        XXX HTML here!
+        :return:
+        """
         retval = ''
         if self.comment:
             retval += ' ' + self.comment

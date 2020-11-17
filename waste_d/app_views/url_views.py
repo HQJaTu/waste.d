@@ -1,12 +1,8 @@
 import datetime
 import re
-
-# XXX ToDo: google.appengine
-#from google.appengine.ext.webapp import template
+import logging
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
-#from google.appengine.api import taskqueue, users, memcache
-#from google.appengine.datastore.datastore_query import Cursor
 
 from waste_d.models.ndb.url_models import Url, ChannelUrl, Post, Rate, Extra
 
@@ -16,9 +12,11 @@ def index(request, date=None, cursor=None, rss=None, channel_filter=None):
     today = datetime.date.today()
 
     # logging.debug('data %s' % (str(data)))
-    tag_cloud = memcache.get('tag_cloud')
-    if not tag_cloud:
-        taskqueue.add(queue_name='default', url='/tasks/maintenance', params={'type': 'tag_cloud'})
+    # XXX ToDo:
+    #tag_cloud = memcache.get('tag_cloud')
+    #if not tag_cloud:
+    #    taskqueue.add(queue_name='default', url='/tasks/maintenance', params={'type': 'tag_cloud'})
+    tag_cloud = None
 
     if not date:
         date = today
@@ -27,10 +25,8 @@ def index(request, date=None, cursor=None, rss=None, channel_filter=None):
     next_date = date - datetime.timedelta(days=-1)
     prev_date = date - datetime.timedelta(days=1)
 
-    # postqry=Post.query(Post.date>=datetime.datetime.combine(date, datetime.time()),Post.date<datetime.datetime.combine(next_date, datetime.time())).order(-Post.date)
     postqry = Post.query(Post.date < datetime.datetime.combine(next_date, datetime.time())).order(-Post.date)
     if cursor:
-        cursor = Cursor(urlsafe=cursor)
         posts, next_cursor, more = postqry.fetch_page(10, start_cursor=cursor)
     else:
         posts, next_cursor, more = postqry.fetch_page(20)
@@ -57,14 +53,6 @@ def index(request, date=None, cursor=None, rss=None, channel_filter=None):
                 data.append({'channelurl': channelurl, 'channel': channel, 'post': post, 'url': url, 'extras': extras,
                              'rates': rates})
 
-        '''
-        channelurls = post.channelurl
-        logging.debug('CU: %s: %s' % (post.key.id(),channelurls))
-        data[post.key.id()]={}
-        #for channelurl in channelurls:
-        data[post.key.id()]['channelurls']=channelurls
-        '''
-
     template_values = {
         'data': data,
         'tag_cloud': tag_cloud,
@@ -76,9 +64,9 @@ def index(request, date=None, cursor=None, rss=None, channel_filter=None):
         'channel': channel_filter,
     }
     if cursor:
-        return render('urls2.html', template_values)
+        return render(request, 'urls2.html', template_values)
 
-    return render('urls.html', template_values)
+    return render(request, 'urls.html', template_values)
 
 
 def view(request, urlid):
@@ -103,7 +91,7 @@ def view(request, urlid):
     template_values = {
         'data': data,
     }
-    return render('url.html', template_values)
+    return render(request, 'url.html', template_values)
 
 
 def view_master(request, urlid):
@@ -132,7 +120,7 @@ def view_master(request, urlid):
         'user': users.get_current_user(),
     }
 
-    return render('masterurl.html', template_values)
+    return render(request, 'masterurl.html', template_values)
 
 
 def tag(request, tag):
@@ -164,7 +152,7 @@ def tag(request, tag):
         'tag_cloud': memcache.get('tag_cloud'),
     }
 
-    return render('tags.html', template_values)
+    return render(request, 'tags.html', template_values)
 
 
 def test(request, a=None, b=None, c=None):
@@ -174,7 +162,7 @@ def test(request, a=None, b=None, c=None):
         'c': c,
     }
 
-    return render('test.html', template_values)
+    return render(request, 'test.html', template_values)
 
 
 def post(request, post_url, post_channel=None, post_user=None):

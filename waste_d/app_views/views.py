@@ -112,12 +112,17 @@ def sign(request):
 
 
 def news(request, rss=None):
-    news = News.query().order(-News.date).fetch(25)
+    news_db = News.query().order(-News.date).fetch(25)
+    news_out = []
+    for piece_of_news in news_db:
+        news = _format_news(piece_of_news)
+        news_out.append(news)
 
     template_values = {
-        'news': news,
+        'news': news_out,
     }
+
     if rss:
-        return render('news_rss.html', template_values, content_type="application/xml")
-    else:
-        return render('news.html', template_values)
+        return render(request, 'news_rss.html', template_values, content_type="application/xml")
+
+    return render(request, 'news.html', template_values)

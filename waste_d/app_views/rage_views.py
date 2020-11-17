@@ -55,7 +55,7 @@ def index(request, rageid=0):
         'date': date,
         'active': int(rageid),
     }
-    return render('rage.html', template_values)
+    return render(request, 'rage.html', template_values)
 
 
 def post(request):

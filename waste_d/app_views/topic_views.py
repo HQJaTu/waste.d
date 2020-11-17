@@ -6,6 +6,7 @@ from django.http import HttpResponse
 from django.shortcuts import render
 #from google.appengine.api import taskqueue, users, memcache
 import json
+import logging
 
 from waste_d.models.ndb.topic_models import Topic
 from waste_d.models.ndb.models import News
@@ -17,7 +18,7 @@ def index(request):
     template_values = {
         'topics': topics,
     }
-    return render('topic.html', template_values)
+    return render(request, 'topic.html', template_values)
 
 
 def post(request):
