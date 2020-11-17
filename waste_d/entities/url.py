@@ -222,7 +222,7 @@ class UrlLogic:
             # or
             # Tell the user their URL was bad and try a different one
             # Request timed out or failed.
-            urlinstance.status = str(response.status_code)
+            urlinstance.status = str(599)
             urlinstance.last_check = datetime.datetime.now()
             urlinstance.valid = urlinstance.valid - 1
             urlinstance.put()
