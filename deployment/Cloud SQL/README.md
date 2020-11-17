@@ -69,6 +69,11 @@ $ gcloud sql users create wappd \
 ```
 
 ## Connect to created instance
+```bash
+$ gcloud sql connect wasted-d --user=root --quiet
+```
+
+## Have Django ORM create schema
 In Django-lingo, the operation is "migrate":
 ```bash
 $ GOOGLE_CLOUD_PROJECT=waste-007 \

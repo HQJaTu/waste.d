@@ -1,16 +1,21 @@
 import datetime
+import string
 import logging
+import re
 import requests
-from waste_d.models.url_models import Url, Channel, ChannelUrl, Post, Rate, Extra
-from waste_d.counter import *
-
-
-DEFAULT_COUNTER_NAME = 'XXX'
+from http import HTTPStatus
+from lxml import etree
+from django.utils.encoding import smart_text
+from waste_d.models.ndb.url_models import Url, Channel, ChannelUrl, Post, Extra
+from waste_d.models import Counter, News
 
 
 class UrlLogic:
     today = datetime.date.today()
     now = datetime.datetime.now()
+
+    DEFAULT_COUNTER_NAME = 'XXX'
+    user_agent = 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)'
 
     url = None
     url_title = None
@@ -44,11 +49,8 @@ class UrlLogic:
         today = datetime.date.today()
         now = datetime.datetime.now()
 
-        # Fetch url (async):
-        #  a) check statuscode LATER
-        #  b) get title LATER
-        response = requests.get(self.url)
-        response.raise_for_status()
+        # Originally all URLs were fetched.
+        # Not fetching an existing URL.
 
         # Get url from DB:
         #  a) already exists
@@ -76,17 +78,20 @@ class UrlLogic:
             logging.info('New channel %s' % self.channel)
 
         # 3. tarkista onko url jo olemassa channel-tasolla
-        channelurlquery = ChannelUrl.query(ChannelUrl.url == urlinstance.key, ChannelUrl.channel == channelinstance.key)
+        channelurlquery = ChannelUrl.query(ChannelUrl.url == urlinstance.key,
+                                           ChannelUrl.channel == channelinstance.key)
         channelurlinstance = channelurlquery.get()
         if not channelurlinstance:
             l = list(string.ascii_uppercase)
             l.append('Z')
 
-            DEFAULT_COUNTER_NAME = chr(now.isocalendar()[0] - 2010 + 65) + l[(now.isocalendar()[1] - 1) / 2]
+            DEFAULT_COUNTER_NAME = chr(now.isocalendar()[0] - 2010 + 65) + \
+                                   l[int((now.isocalendar()[1] - 1) / 2)]
             # logging.debug('DEFAULT_COUNTER_NAME: %s' % (DEFAULT_COUNTER_NAME))
 
-            counter.increment(DEFAULT_COUNTER_NAME)
-            key_name = DEFAULT_COUNTER_NAME + str(counter.get_count(DEFAULT_COUNTER_NAME))
+            count_obj = Counter(name=DEFAULT_COUNTER_NAME)
+            count = count_obj.increment(DEFAULT_COUNTER_NAME)
+            key_name = DEFAULT_COUNTER_NAME + str(count)
             # logging.debug('key_name %s' % (key_name))
 
             channelurlinstance = ChannelUrl(id=key_name, channel=channelinstance.key, url=urlinstance.key)
@@ -107,85 +112,38 @@ class UrlLogic:
             old_user = old_post.user
 
         # 4. Lisätään postaus (tarkistetaan ettei ole jo)
-        postquery = Post.query(Post.channelurl == channelurlinstance.key, Post.user == self.user, Post.date == date)
+        postquery = Post.query(Post.channelurl == channelurlinstance.key,
+                               Post.user == self.user, Post.date == self.date)
         postinstance = postquery.get()
         if postinstance:
-            logging.info('Old post; channel: %s, url: %s, user: %s' % (self.channel, self.url,self. user))
+            logging.info('Old post; channel: %s, url: %s, user: %s' % (self.channel, self.url, self.user))
         else:
-            postinstance = Post(channelurl=channelurlinstance.key, user=self.user, date=date)
+            postinstance = Post(channelurl=channelurlinstance.key, user=self.user, date=self.date)
             postinstance.put()
 
-            # 5. extrat
+            # 5. extract
             # Comment
-            if orig_url != line:
-                comment = line.replace(orig_url, '<url>')
+            if orig_url != self.line:
+                comment = self.line.replace(orig_url, '<url>')
                 # logging.debug('Line: %s, url: %s, comment: %s' % (line,orig_url,comment))
 
                 # TODO:
                 # <url>/
                 # Tyhjät kommentit: ''
                 if comment not in ['<url>/', '']:
-                    Extra(user=user, comment=comment, channelurl=channelurlinstance.key).put()
+                    Extra(user=self.user, comment=comment, channelurl=channelurlinstance.key).put()
                 else:
                     comment = None
 
-        # Resolve async calls
-        # Urlfetch
-        try:
-            result = rpc.get_result()
-            if result and result.content_was_truncated:
-                logging.debug('Truncated')
-                tags = 'truncated'
-                Extra(user='Tarantino', tag=tags, channelurl=channelurlinstance.key).put()
-            if result and result.status_code:
-                urlinstance.status = str(result.status_code)
-                urlinstance.last_check = datetime.datetime.now()
-            if result.status_code == 200:
-                urlinstance.valid = 2
-                try:
-                    # Fetch title
-                    req = urllib2.Request(url)
-                    # logging.debug('req %s' % (req))
-                    req.add_header('User-agent',
-                                   'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)')
-                    res = urllib2.urlopen(req)
-                    # logging.debug('res %s' % (res))
-                    doc = res.read()
-                    # logging.debug('doc %s' % (doc))
-                    encoding = res.headers.getparam('charset')
-                    # logging.debug('encoding %s' % (encoding))
-                    tree = etree.fromstring(doc, etree.HTMLParser(encoding=encoding))
-                    title = tree.find(".//title").text
-                    url_title = smart_text(re.sub(r'\s+', ' ', title).strip())
-                except:
-                    logging.warning('Title not fetched %s' % (url))
-                else:
-                    # logging.debug('Url: %s, title %s' % (url,title))
-                    urlinstance.title = url_title
-                # except:
-                #  logging.debug('TitleTask: title not fetched %s' % (url))
-                # urlinstance.title = url
-
-            else:
-                if urlinstance.valid > -5:
-                    urlinstance.valid = urlinstance.valid - 1
-                else:
-                    logging.info('Broken url: %s' % (url))
-            urlinstance.put()
-            # logging.debug('URL %s saved (status code %s).' % (url,str(result.status_code)))
-        except (urlfetch.DownloadError, urlfetch.DeadlineExceededError, urlfetch.InternalTransientError):
-            # Request timed out or failed.
-            # ...
-            urlinstance.valid = urlinstance.valid - 1
-            urlinstance.put()
-            logging.warning('Urlfetch \'%s\' failed.' % (url))
+        # Go do some HTTP-requesting
+        url_title = self._get_url(urlinstance)
 
         # Update News
-        if channelinstance.private == False and date.date() >= today:
+        if channelinstance.private == False and self.date.date() >= today:
             try:
                 news = News(content='Link')
-                news.link = url
-                news.link_text = url_title or url
+                news.link = self.url
+                news.link_text = url_title or self.url
                 news.put()
                 # logging.debug('News updated')
             except:
@@ -197,6 +155,7 @@ class UrlLogic:
             url_title = ''.join(self.url.split('/')[-1:])
         # logging.debug('Title: %s' % (url_title))
 
+        """
         # Create Document (FullTextSearch)
         doc_id = str(urlinstance.key.id())
         try:
@@ -240,5 +199,50 @@ class UrlLogic:
                 logging.warning('TaskAlreadyExistsError %s_retry' % (doc_id))
             except:
                 logging.critical('Something weird happened, again?')
+        """
 
         return channelinstance
+
+    def _get_url(self, urlinstance):
+        headers = {
+            'User-Agent': self.user_agent
+        }
+
+        # Go for URL!
+        try:
+            response = requests.get(self.url, headers=headers)
+        except (requests.exceptions.Timeout, requests.exceptions.TooManyRedirects):
+            # Maybe set up for a retry, or continue in a retry loop
+            # or
+            # Tell the user their URL was bad and try a different one
+            # Request timed out or failed.
+            urlinstance.valid = urlinstance.valid - 1
+            urlinstance.put()
+            logging.warning('Urlfetch \'%s\' failed.' % self.url)
+
+            return
+        except requests.exceptions.RequestException as e:
+            # catastrophic error. bail.
+            raise SystemExit(e)
+
+        # Harvest result
+        urlinstance.status = str(response.status_code)
+        urlinstance.last_check = datetime.datetime.now()
+
+        if response.status_code == HTTPStatus.OK:
+            urlinstance.valid = 2
+            # logging.debug('encoding %s' % (encoding))
+            tree = etree.fromstring(response.text, etree.HTMLParser(encoding=response.encoding))
+            title = tree.find(".//title").text
+            url_title = smart_text(re.sub(r'\s+', ' ', title).strip())
+        else:
+            if urlinstance.valid > -5:
+                urlinstance.valid = urlinstance.valid - 1
+            else:
+                logging.info('Broken url: %s' % self.url)
+            url_title = None
+
+        urlinstance.put()
+        # logging.debug('URL %s saved (status code %s).' % (url,str(result.status_code)))
+
+        return url_title

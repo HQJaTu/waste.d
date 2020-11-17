@@ -1,19 +1,16 @@
 import cgi
-import os, sys
 import datetime
-import re
 import json
 import random
 
 # XXX ToDo: google.appengine
 #from google.appengine.ext.webapp import template
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse
 from django.shortcuts import render
-import google.cloud.logging
 #from google.appengine.api import taskqueue, users, memcache
 
-from waste_d.models.rage_models import Rage, Panel
-from waste_d.models.models import News
+from waste_d.models.ndb.rage_models import Rage, Panel
+from waste_d.models.ndb.models import News
 
 
 def index(request, rageid=0):

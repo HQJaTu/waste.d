@@ -1,6 +1,3 @@
-import datetime
-from xml.dom import minidom
-from xml.parsers.expat import ExpatError
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 
@@ -8,7 +5,7 @@ import google.cloud.logging
 import google.auth.transport.requests
 import google.oauth2.id_token
 from google.cloud import ndb
-from waste_d.models.models import Greeting, News
+from waste_d.models.ndb.models import Greeting, News
 
 import os
 

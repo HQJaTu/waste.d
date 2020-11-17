@@ -3,17 +3,13 @@ import logging
 import re
 import json
 import string
-
-
-from django.http import HttpResponseRedirect, HttpResponse
+from django.http import HttpResponse
 from rest_framework.views import APIView
 from rest_framework import authentication, permissions
-from django.views.decorators.cache import cache_page, never_cache
-from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_http_methods
+from django.views.decorators.cache import never_cache
 from rest_framework.decorators import parser_classes
 from rest_framework.parsers import JSONParser
-from waste_d.models.url_models import Url, Channel, ChannelUrl, Post, Rate, Extra
+from waste_d.models.ndb.url_models import Url, Channel, ChannelUrl, Rate, Extra
 from waste_d.entities.url import UrlLogic
 
 logger = logging.getLogger(__name__)

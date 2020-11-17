@@ -1,5 +1,3 @@
-import cgi
-import os, sys
 import datetime
 import re
 
@@ -7,11 +5,10 @@ import re
 #from google.appengine.ext.webapp import template
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
-import google.cloud.logging
 #from google.appengine.api import taskqueue, users, memcache
 #from google.appengine.datastore.datastore_query import Cursor
 
-from waste_d.models.url_models import Url, Channel, ChannelUrl, Post, Rate, Extra
+from waste_d.models.ndb.url_models import Url, ChannelUrl, Post, Rate, Extra
 
 
 def index(request, date=None, cursor=None, rss=None, channel_filter=None):

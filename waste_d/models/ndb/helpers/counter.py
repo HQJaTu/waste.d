@@ -1,6 +1,9 @@
 import random
-
 from google.cloud import ndb
+from waste_d.models import Counter
+
+
+# from waste_d.models.sql.counter import Counter
 
 
 class GeneralCounterShardConfig(ndb.Model):
@@ -42,16 +45,18 @@ def get_count(name):
         Integer; the cumulative count of all sharded counters for the given
             counter name.
     """
-    total = memcache.get(name)
-    if total is None:
+    total_db = Counter.objects.get(name=name)
+    if total_db is None:
         total = 0
         all_keys = GeneralCounterShardConfig.all_keys(name)
         for counter in ndb.get_multi(all_keys):
             if counter is not None:
                 total += counter.count
-        memcache.add(name, total, 60)
 
-    return total
+        total_db = Counter(name=name, count=total)
+        total_db.save()
+
+    return total_db.count
 
 
 def increment(name):
@@ -61,7 +66,7 @@ def increment(name):
         name: The name of the counter.
     """
     config = GeneralCounterShardConfig.get_or_insert(name)
-    _increment(name, config.num_shards)
+    return _increment(name, config.num_shards)
 
 
 @ndb.transactional
@@ -81,8 +86,11 @@ def _increment(name, num_shards):
         counter = GeneralCounterShard(id=shard_key_string)
     counter.count += 1
     counter.put()
-    # Memcache increment does nothing if the name is not a key in memcache
-    memcache.incr(name)
+
+    total_db = Counter.objects.get(name=name)
+    new_count = total_db.increment()
+
+    return new_count
 
 
 @ndb.transactional
