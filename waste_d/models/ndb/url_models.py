@@ -42,14 +42,11 @@ class Url(ndb.Model):
             else:
                 return new_title
 
-    def __unicode__(self):
+    def __str__(self):
         if self.title:
             return self.title
         else:
             return ''.join(self.url.split('/')[-1:])
-
-    def __str__(self):
-        return unicode(self).encode('utf-8')
 
 
 class Channel(ndb.Model):
@@ -60,11 +57,8 @@ class Channel(ndb.Model):
     idate = ndb.DateTimeProperty(auto_now_add=True)
     udate = ndb.DateTimeProperty(auto_now=True)
 
-    def __unicode__(self):
-        return self.name
-
     def __str__(self):
-        return unicode(self).encode('utf-8')
+        return self.name
 
 
 class ChannelUrl(ndb.Model):
@@ -114,11 +108,8 @@ class ChannelUrl(ndb.Model):
             msgs.append('%s/%s @ %s' % (post.user, chl.name, post.date))
         return ', '.join(msgs)
 
-    def __unicode__(self):
-        return unicode(self.key.id())
-
     def __str__(self):
-        return unicode(self).encode('utf-8')
+        return str(self.key.id())
 
 
 class Post(ndb.Model):
@@ -132,11 +123,8 @@ class Post(ndb.Model):
     idate = ndb.DateTimeProperty(auto_now_add=True)
     udate = ndb.DateTimeProperty(auto_now=True)
 
-    def __unicode__(self):
-        return unicode(self.key.id())
-
     def __str__(self):
-        return unicode(self).encode('utf-8')
+        return str(self.key.id())
 
 
 class Rate(ndb.Model):
@@ -150,11 +138,8 @@ class Rate(ndb.Model):
     idate = ndb.DateTimeProperty(auto_now_add=True)
     udate = ndb.DateTimeProperty(auto_now=True)
 
-    def __unicode__(self):
-        return '%s %+d' % (self.user, self.value)
-
     def __str__(self):
-        return unicode(self).encode('utf-8')
+        return '%s %+d' % (self.user, self.value)
 
 
 class Extra(ndb.Model):
@@ -170,7 +155,7 @@ class Extra(ndb.Model):
     idate = ndb.DateTimeProperty(auto_now_add=True)
     udate = ndb.DateTimeProperty(auto_now=True)
 
-    def __unicode__(self):
+    def __str__(self):
         retval = ''
         if self.comment:
             retval += ' ' + self.comment
@@ -186,6 +171,3 @@ class Extra(ndb.Model):
         if self.related:
             retval += ' <a href="/url/view/' + self.related + '/"><span class="label label-info">' + self.related + '</span></a>'
         return retval.strip()
-
-    def __str__(self):
-        return unicode(self).encode('utf-8')

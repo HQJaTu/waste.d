@@ -1,13 +1,12 @@
+import os
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
-
 import google.cloud.logging
 import google.auth.transport.requests
 import google.oauth2.id_token
 from google.cloud import ndb
 from waste_d.models.ndb.models import Greeting, News
-
-import os
+from waste_d.models.ndb.url_models import Url, ChannelUrl, Extra
 
 HTTP_REQUEST = google.auth.transport.requests.Request()
 
@@ -49,7 +48,11 @@ def index(request):
     ).order(-Greeting.date)
     greetings = greetings_query.fetch(10)
 
-    last_5_news = News.query().order(-News.date).fetch(5)
+    last_5_news_db = News.query().order(-News.date).fetch(5)
+    last_5_news = []
+    for piece_of_news in last_5_news_db:
+        news = _format_news(piece_of_news)
+        last_5_news.append(news)
 
     template_values = {
         'url': '',
@@ -61,6 +64,26 @@ def index(request):
     }
 
     return render(request, 'index.html', template_values)
+
+
+def _format_news(news_db):
+    content = news_db.content
+    link = news_db.link
+    if news_db.link_text:
+        link_text = news_db.link_text
+    else:
+        link_text = None
+        url = Url.query(Url.url == news_db.link).get(keys_only=True)
+        channel_url = ChannelUrl.query(ChannelUrl.url == url).get(keys_only=True)
+        extra = Extra.query(Extra.channelurl == channel_url).get(keys_only=False)
+        if extra and extra.comment:
+            link_text = extra.comment
+        if not link_text:
+            link_text = ''.join(news_db.link.split('/')[-1:])
+
+    news = '%s: <a target="_blank" href="%s">%s</a>' % (content, link, link_text)
+
+    return news
 
 
 def _guestbook_key(guestbook_name=DEFAULT_GUESTBOOK_NAME):

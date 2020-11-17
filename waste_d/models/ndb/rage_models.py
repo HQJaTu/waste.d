@@ -10,14 +10,11 @@ class Rage(ndb.Model):
     idate = ndb.DateTimeProperty(auto_now_add=True)
     udate = ndb.DateTimeProperty(auto_now=True)
 
-    def __unicode__(self):
+    def __str__(self):
         if not self.title:
             return self.date.strftime("%Y-%m-%d %H:%M")
         else:
             return self.title
-
-    def __str__(self):
-        return unicode(self).encode('utf-8')
 
 
 class Panel(ndb.Model):
@@ -32,8 +29,5 @@ class Panel(ndb.Model):
     idate = ndb.DateTimeProperty(auto_now_add=True)
     udate = ndb.DateTimeProperty(auto_now=True)
 
-    def __unicode__(self):
-        return self.msg
-
     def __str__(self):
-        return unicode(self).encode('utf-8')
+        return self.msg
