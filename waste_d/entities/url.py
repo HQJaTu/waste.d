@@ -15,6 +15,7 @@ class UrlLogic:
     now = datetime.datetime.now()
 
     user_agent = 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)'
+    request_timeout = 5.0
 
     url = None
     url_title = None
@@ -216,7 +217,7 @@ class UrlLogic:
 
         # Go for URL!
         try:
-            response = requests.get(self.url, headers=headers)
+            response = requests.get(self.url, headers=headers, timeout=self.request_timeout)
         except (requests.exceptions.Timeout, requests.exceptions.TooManyRedirects):
             # Maybe set up for a retry, or continue in a retry loop
             # or
