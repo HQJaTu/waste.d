@@ -14,7 +14,6 @@ class UrlLogic:
     today = datetime.date.today()
     now = datetime.datetime.now()
 
-    DEFAULT_COUNTER_NAME = 'XXX'
     user_agent = 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)'
 
     url = None
@@ -47,7 +46,6 @@ class UrlLogic:
         orig_url = self.url
 
         today = datetime.date.today()
-        now = datetime.datetime.now()
 
         # Originally all URLs were fetched.
         # Not fetching an existing URL.
@@ -82,16 +80,10 @@ class UrlLogic:
                                            ChannelUrl.channel == channelinstance.key)
         channelurlinstance = channelurlquery.get()
         if not channelurlinstance:
-            l = list(string.ascii_uppercase)
-            l.append('Z')
-
-            DEFAULT_COUNTER_NAME = chr(now.isocalendar()[0] - 2010 + 65) + \
-                                   l[int((now.isocalendar()[1] - 1) / 2)]
-            # logging.debug('DEFAULT_COUNTER_NAME: %s' % (DEFAULT_COUNTER_NAME))
-
-            count_obj = Counter(name=DEFAULT_COUNTER_NAME)
-            count = count_obj.increment(DEFAULT_COUNTER_NAME)
-            key_name = DEFAULT_COUNTER_NAME + str(count)
+            counter_name = UrlLogic._get_counter_name_for_now()
+            count_obj = Counter(name=counter_name)
+            count = count_obj.increment(counter_name)
+            key_name = counter_name + str(count)
             # logging.debug('key_name %s' % (key_name))
 
             channelurlinstance = ChannelUrl(id=key_name, channel=channelinstance.key, url=urlinstance.key)
@@ -203,6 +195,20 @@ class UrlLogic:
 
         return channelinstance
 
+    @staticmethod
+    def _get_counter_name_for_now():
+        now = datetime.datetime.now()
+        l = list(string.ascii_uppercase)
+        l.append('Z')
+
+        # Key:
+        # 1st char: A = 2010
+        # 2nd char: A = 1st week of the year
+        # Example:
+        counter_name = chr(now.isocalendar()[0] - 2010 + 65) + l[int((now.isocalendar()[1] - 1) / 2)]
+
+        return counter_name
+
     def _get_url(self, urlinstance):
         headers = {
             'User-Agent': self.user_agent
@@ -216,9 +222,11 @@ class UrlLogic:
             # or
             # Tell the user their URL was bad and try a different one
             # Request timed out or failed.
+            urlinstance.status = str(response.status_code)
+            urlinstance.last_check = datetime.datetime.now()
             urlinstance.valid = urlinstance.valid - 1
             urlinstance.put()
-            logging.warning('Urlfetch \'%s\' failed.' % self.url)
+            logging.warning('URL "%s" failed (no HTTP-status).' % self.url)
 
             return
         except requests.exceptions.RequestException as e:
@@ -231,10 +239,10 @@ class UrlLogic:
 
         if response.status_code == HTTPStatus.OK:
             urlinstance.valid = 2
-            # logging.debug('encoding %s' % (encoding))
             tree = etree.fromstring(response.text, etree.HTMLParser(encoding=response.encoding))
             title = tree.find(".//title").text
             url_title = smart_text(re.sub(r'\s+', ' ', title).strip())
+            urlinstance.title = url_title
         else:
             if urlinstance.valid > -5:
                 urlinstance.valid = urlinstance.valid - 1
@@ -243,6 +251,6 @@ class UrlLogic:
             url_title = None
 
         urlinstance.put()
-        # logging.debug('URL %s saved (status code %s).' % (url,str(result.status_code)))
+        logging.debug('URL "%s" saved (HTTP/%d).' % (self.url, response.status_code))
 
         return url_title
