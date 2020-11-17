@@ -14,7 +14,9 @@ class Counter(models.Model):
         obj = Counter.objects.filter(pk=name)
         if obj:
             obj.update(count=F('count') + 1)
-
+            obj = obj[0]
+            count = obj.count
+            log_str = "Count now: %d" % count
         else:
             obj = Counter(name=name, count=1)
             obj.save()
