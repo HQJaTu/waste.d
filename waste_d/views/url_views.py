@@ -58,7 +58,10 @@ def index(request, date=None, cursor=None, rss=None, channel_filter=None):
                              'extras': extras,
                              'rates': rates})
 
-    next_cursor_str = next_cursor.urlsafe().decode('ascii')
+    if next_cursor:
+        next_cursor_str = next_cursor.urlsafe().decode('ascii')
+    else:
+        next_cursor_str = None
     template_values = {
         'data': data,
         'tag_cloud': tag_cloud,
