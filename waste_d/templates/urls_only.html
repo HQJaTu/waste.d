@@ -12,7 +12,7 @@
   {% else %}
     &nbsp;&nbsp;
   {% endifchanged %}
-  {{ row.post.date|date:"H:i" }} 
+  {{ row.post.date|date:"H:i" }}
   {{ row.post.user }}
   <a href="/url/channel/{{ row.channel|slugify }}/" title="Filter">{{ row.channel }}</a>
   (<a href="/url/view/{{ row.channelurl }}/" title="View/edit">{{ row.channelurl }}</a>)
@@ -21,10 +21,10 @@
   <br>
 {% endfor %}
 
-{% if next %}  
+{% if next %}
   {% if channel %}
-    <a href="/url/channel/{{ channel }}/{{ date|date:"Y-m-d"}}/{{ next.urlsafe }}">Next >></a>
+    <a href="/url/channel/{{ channel }}/{{ date|date:"Y-m-d"}}/{{ next }}">Next >></a>
   {% else %}
-    <a href="/url/{{ date|date:"Y-m-d"}}/{{ next.urlsafe }}">Next >></a>
+    <a href="/url/{{ date|date:"Y-m-d"}}/{{ next }}">Next >></a>
   {% endif %}
 {% endif %}

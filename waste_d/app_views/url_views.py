@@ -3,7 +3,7 @@ import re
 import logging
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
-
+from google.cloud import ndb
 from waste_d.models.ndb.url_models import Url, ChannelUrl, Post, Rate, Extra
 
 
@@ -13,8 +13,8 @@ def index(request, date=None, cursor=None, rss=None, channel_filter=None):
 
     # logging.debug('data %s' % (str(data)))
     # XXX ToDo:
-    #tag_cloud = memcache.get('tag_cloud')
-    #if not tag_cloud:
+    # tag_cloud = memcache.get('tag_cloud')
+    # if not tag_cloud:
     #    taskqueue.add(queue_name='default', url='/tasks/maintenance', params={'type': 'tag_cloud'})
     tag_cloud = None
 
@@ -27,7 +27,8 @@ def index(request, date=None, cursor=None, rss=None, channel_filter=None):
 
     postqry = Post.query(Post.date < datetime.datetime.combine(next_date, datetime.time())).order(-Post.date)
     if cursor:
-        posts, next_cursor, more = postqry.fetch_page(10, start_cursor=cursor)
+        cursor_obj = ndb.Cursor(urlsafe=cursor)
+        posts, next_cursor, more = postqry.fetch_page(10, start_cursor=cursor_obj)
     else:
         posts, next_cursor, more = postqry.fetch_page(20)
 
@@ -50,13 +51,18 @@ def index(request, date=None, cursor=None, rss=None, channel_filter=None):
             if channel.private == False:
                 extras = Extra.query(Extra.channelurl == post.channelurl)
                 rates = Rate.query(Rate.channelurl == post.channelurl)
-                data.append({'channelurl': channelurl, 'channel': channel, 'post': post, 'url': url, 'extras': extras,
+                data.append({'channelurl': channelurl,
+                             'channel': channel,
+                             'post': post,
+                             'url': str(url),
+                             'extras': extras,
                              'rates': rates})
 
+    next_cursor_str = next_cursor.urlsafe().decode('ascii')
     template_values = {
         'data': data,
         'tag_cloud': tag_cloud,
-        'next': next_cursor,
+        'next': next_cursor_str,
         'date': date,
         'next_date': next_date,
         'prev_date': prev_date,
@@ -70,12 +76,13 @@ def index(request, date=None, cursor=None, rss=None, channel_filter=None):
 
 
 def view(request, urlid):
-    data = []
+    data = {}
     logging.debug('View ChannelUrl %s' % (urlid))
     try:
         urlid = int(urlid)
     except:
         pass
+
     channelurl = ChannelUrl.get_by_id(urlid)
     if channelurl:
         channel = channelurl.channel.get()
@@ -86,7 +93,13 @@ def view(request, urlid):
             rates = Rate.query(Rate.channelurl == channelurl.key)
             rating = channelurl.rating()
             # data.append({'channel':channel,'post':post,'url':url,'extras': extras})
-            data = {'channel': channel, 'post': post, 'url': url, 'extras': extras, 'rates': rates, 'rating': rating}
+            data = {'channel': channel,
+                    'post': post,
+                    'url': url,
+                    'extras': extras,
+                    'rates': rates,
+                    'rating': rating
+                    }
 
     template_values = {
         'data': data,

@@ -1,3 +1,4 @@
+{% load static %}
 {% block content %}
 <div class="jscroll">
 {% include "urls_only.html" %}
@@ -5,7 +6,7 @@
 {% endblock %}
 
 {% block bodyend %}
-<script src="/js/jquery.jscroll.js"></script>
+<script src="{% static '/js/jquery.jscroll.js' %}"></script>
 <script>
 
 $(function() {
