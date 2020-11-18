@@ -18,6 +18,6 @@ from django.urls import path, include, re_path
 from waste_d.urls import urlpatterns as wasted_patterns
 
 urlpatterns = [
-    path('', include(wasted_patterns)),
     path('admin/', admin.site.urls),
+    path('', include(wasted_patterns)),
 ]
