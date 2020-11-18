@@ -18,7 +18,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include, re_path
 
-from .app_views import *
+from .views import *
 from .app_urls.sandbox_urls import urlpatterns as sandbox_patterns
 from .app_urls.url_urls import urlpatterns as url_patterns
 from .app_urls.rage_urls import urlpatterns as rage_patterns

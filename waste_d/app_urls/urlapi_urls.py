@@ -1,5 +1,5 @@
 from django.urls import path, include, re_path
-from waste_d.app_views import urlapi_views
+from waste_d.views import urlapi_views
 
 urlpatterns = [
     re_path(r'post/$', urlapi_views.API.as_view()),

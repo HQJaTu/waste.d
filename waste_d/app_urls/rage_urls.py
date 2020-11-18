@@ -1,5 +1,5 @@
 from django.urls import path, include, re_path
-from waste_d.app_views import rage_views
+from waste_d.views import rage_views
 
 urlpatterns = [
     re_path(r'post/$', rage_views.post),

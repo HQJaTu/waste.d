@@ -1,5 +1,5 @@
 from django.urls import path, include, re_path
-from waste_d.app_views import url_views
+from waste_d.views import url_views
 from .urlapi_urls import urlpatterns as urlapi_patterns
 
 urlpatterns = [
