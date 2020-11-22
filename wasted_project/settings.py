@@ -201,7 +201,7 @@ if 'GCP_REGION' not in os.environ and os.environ['DJANGO_ENV'] == DJANGO_ENV_PRO
     }
     r = requests.get(meta_url, headers=headers)
     r.raise_for_status()
-    match = re.search(r'^projects/\d+/zones/(.+)-?', r.text)
+    match = re.search(r'^projects/\d+/zones/(\w+-\w+)-(\d)', r.text)
     if match:
         os.environ['GCP_REGION'] = match.group(1)
         log.info('[%d] (info) Region is: %s' % (pid, os.environ['GCP_REGION']))
