@@ -202,8 +202,9 @@ if 'GCP_REGION' not in os.environ and os.environ['DJANGO_ENV'] == DJANGO_ENV_PRO
     r = requests.get(meta_url, headers=headers)
     r.raise_for_status()
     log.info('[%d] Meta request for %s returned: "%s"' % (pid, meta_url, r.text))
-    match = re.search(r'^projects/\d+/zones/(.+)-?')
+    log.error('[%d] Meta request for %s returned: "%s"' % (pid, meta_url, r.text))
+    match = re.search(r'^projects/\d+/zones/(.+)-?', r.text)
     if match:
-        os.environ['GCP_REGION'] = match.groups[1]
+        os.environ['GCP_REGION'] = match.group(1)
     else:
         raise Exception("Cannot determine region from '%s'. Stop." % r.text)
