@@ -14,6 +14,7 @@ import os
 from pathlib import Path
 from google.cloud import secretmanager
 import logging
+import re
 from wasted_project import DJANGO_ENV_DEV, DJANGO_ENV_PROD
 
 log = logging.getLogger(__name__)
@@ -164,14 +165,18 @@ else:
 
 # Query for region?
 if 'GCP_REGION' not in os.environ and os.environ['DJANGO_ENV'] == DJANGO_ENV_PROD:
-    import requests
-
-    meta_url = 'http://metadata.google.internal/computeMetadata/v1/instance/region'
-    r = requests.get(meta_url)
-    r.raise_for_status()
-    log.info('[%d] Meta request for %s returned: "%s"' % (pid, meta_url, r.text))
-    os.environ['GCP_REGION'] = r.text.rstrip()
-
     for env_var in os.environ:
         log.error("error Env: '%s' = '%s'" % (env_var, os.environ[env_var]))
         log.info("info Env: '%s' = '%s'" % (env_var, os.environ[env_var]))
+
+    import requests
+
+    meta_url = 'http://metadata.google.internal/computeMetadata/v1/instance/zone'
+    r = requests.get(meta_url)
+    r.raise_for_status()
+    log.info('[%d] Meta request for %s returned: "%s"' % (pid, meta_url, r.text))
+    match = re.search(r'^projects/\d+/zones/(.+)-?')
+    if match:
+        os.environ['GCP_REGION'] = match.groups[1]
+    else:
+        raise Exception("Cannot determine region from '%s'. Stop." % r.text)
