@@ -6,6 +6,8 @@ import os
 # to be equal to the cores available.
 
 # See: Dockerfile PORT=
+# and https://cloud.google.com/run/docs/configuring/environment-variables
+# and https://cloud.google.com/run/docs/reference/container-contract#env-vars
 if "PORT" in os.environ:
     port = int(os.environ['PORT'])
 else:
