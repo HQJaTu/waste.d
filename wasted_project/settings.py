@@ -14,6 +14,7 @@ import os
 from pathlib import Path
 from google.cloud import secretmanager
 import logging
+from wasted_project import DJANGO_ENV_DEV, DJANGO_ENV_PROD
 
 log = logging.getLogger(__name__)
 
@@ -22,6 +23,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
+
+pid = os.getpid()
+log.info("[%d] Django environment determined as: %s" % (pid, os.environ['DJANGO_ENV']))
+
 
 # Create the Secret Manager client.
 client = secretmanager.SecretManagerServiceClient()
@@ -37,9 +42,6 @@ DEBUG = True
 ALLOWED_HOSTS = []
 if "GCP_RUN_HOSTS" in os.environ:
     ALLOWED_HOSTS.extend(os.environ['GCP_RUN_HOSTS'].split(','))
-    log.info("Adding '%s' as an allowed host" % os.environ['GCP_RUN_HOSTS'])
-else:
-    log.warning("No known hosts defined! (See env var GCP_RUN_HOSTS.)")
 
 # Application definition
 
@@ -108,7 +110,6 @@ DATABASES = {
     }
 }
 
-
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators
 
@@ -159,3 +160,18 @@ else:
     STATICFILES_DIRS = [
         "%s/static" % BASE_DIR,
     ]
+
+
+# Query for region?
+if 'GCP_REGION' not in os.environ and os.environ['DJANGO_ENV'] == DJANGO_ENV_PROD:
+    import requests
+
+    meta_url = 'http://metadata.google.internal/computeMetadata/v1/instance/region'
+    r = requests.get(meta_url)
+    r.raise_for_status()
+    log.info('[%d] Meta request for %s returned: "%s"' % (pid, meta_url, r.text))
+    os.environ['GCP_REGION'] = r.text.rstrip()
+
+    for env_var in os.environ:
+        log.error("error Env: '%s' = '%s'" % (env_var, os.environ[env_var]))
+        log.info("info Env: '%s' = '%s'" % (env_var, os.environ[env_var]))
