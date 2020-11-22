@@ -28,6 +28,28 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 pid = os.getpid()
 log.info("[%d] Django environment determined as: %s" % (pid, os.environ['DJANGO_ENV']))
 
+# GCP Cloud Run environment:
+# HOME=/home/app-user
+# LANG=C.UTF-8
+# GPG_KEY=[-redacted-]
+# PATH=/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+# GCP_STATIC_URL=[-redacted-]
+# PWD=/wasted_django'
+# GCP_RUN_HOSTS=[-redacted-]
+# K_CONFIGURATION=waste-d
+# PORT=8000
+# K_SERVICE=waste-d
+# PYTHON_GET_PIP_URL=https://github.com/pypa/get-pip/raw/fa7dc83944936bf09a0e4cb5d5ec852c0d256599/get-pip.py'
+# PYTHON_VERSION=3.8.6
+# PYTHON_GET_PIP_SHA256=6e0bb0a2c2533361d7f297ed547237caf1b7507f197835974c0dd7eba998c53c
+# GOOGLE_CLOUD_PROJECT=[-redacted-]
+# K_REVISION=[-redacted-]
+# PYTHON_PIP_VERSION=20.2.4
+# PYTHONUNBUFFERED=TRUE
+# APP_HOME=/wasted_django
+# SERVER_SOFTWARE=gunicorn/20.0.4
+# DJANGO_ENV=Production
+# DJANGO_SETTINGS_MODULE=wasted_project.settings
 
 # Create the Secret Manager client.
 client = secretmanager.SecretManagerServiceClient()
@@ -165,14 +187,19 @@ else:
 
 # Query for region?
 if 'GCP_REGION' not in os.environ and os.environ['DJANGO_ENV'] == DJANGO_ENV_PROD:
-    for env_var in os.environ:
-        log.error("error Env: '%s' = '%s'" % (env_var, os.environ[env_var]))
-        log.info("info Env: '%s' = '%s'" % (env_var, os.environ[env_var]))
+    # Debug output environment:
+    #for env_var in os.environ:
+    #    log.error("error Env: '%s' = '%s'" % (env_var, os.environ[env_var]))
+    #    log.info("info Env: '%s' = '%s'" % (env_var, os.environ[env_var]))
 
+    # For metadata requests, see: https://cloud.google.com/compute/docs/storing-retrieving-metadata
     import requests
 
     meta_url = 'http://metadata.google.internal/computeMetadata/v1/instance/zone'
-    r = requests.get(meta_url)
+    headers = {
+        'Metadata-Flavor': 'Google'
+    }
+    r = requests.get(meta_url, headers=headers)
     r.raise_for_status()
     log.info('[%d] Meta request for %s returned: "%s"' % (pid, meta_url, r.text))
     match = re.search(r'^projects/\d+/zones/(.+)-?')
