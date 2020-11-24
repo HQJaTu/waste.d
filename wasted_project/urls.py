@@ -15,9 +15,11 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include, re_path
+from django_cloud_tasks import urls as dct_urls
 from waste_d.urls import urlpatterns as wasted_patterns
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('_tasks/', include(dct_urls)),
     path('', include(wasted_patterns)),
 ]

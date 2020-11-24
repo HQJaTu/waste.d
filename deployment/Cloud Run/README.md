@@ -1,18 +1,9 @@
 # Create Google Cloud Platform project
 
-## Create the project
-
-Creation in cloud shell:
-```bash
-$ gcloud config set project <your-project-id-here!>
-```
-
 ## Use existing project
 Subsequent use on a created project, in cloud shell:
 ```bash
 $ gcloud config set project <your-project-id-here!>
-$ cd waste.d/
-$ source venv/bin/activate
 ```
 
 # Enable required Cloud APIs
@@ -27,6 +18,8 @@ $ gcloud services enable cloudbuild.googleapis.com
 $ gcloud services enable secretmanager.googleapis.com
 $ gcloud services enable sqladmin.googleapis.com
 $ gcloud services enable servicenetworking.googleapis.com
+$ gcloud services enable cloudtasks.googleapis.com
+$ gcloud services enable cloudsearch.googleapis.com
 ```
 
 # VPC
@@ -84,6 +77,8 @@ Go to Project's _API & API settings_, _Credentials_, _Service Accounts_.
   * _Cloud Run Invoker_
   * _Datastore User_
   * _Secret Manager Secret Accessor_
+  * _App Engine Viewer_
+  * _Cloud Tasks Enqueuer_
 * Service account ID: `<default is ok>`
 * Key Type: _JSON_
 
@@ -165,6 +160,32 @@ $ gsutil iam ch allUsers:objectViewer gs://waste-static/
 $ gsutil rsync -r static/ gs://waste-static/
 ```
 
+# Cloud Tasks
+**Note**: Cloud Tasks is bound to App Engine app.
+
+Confirm the location:
+```bash
+$ gcloud app describe
+```
+Will return: `locationId: europe-west3`
+
+**Note 2**: 
+
+## Create task queue
+```bash
+$ gcloud tasks queues create document
+$ gcloud tasks queues create maintenance
+$ gcloud tasks queues create urlfetch
+```
+
+# Cloud Search
+Docs: https://github.com/google-cloudsearch/connector-api-python
+
+## Create search schema
+```bash
+$ gcloud tasks queues create waste-d
+```
+
 # Python:
 
 ## Create
@@ -206,7 +227,7 @@ $ GOOGLE_CLOUD_PROJECT=waste-007 \
   python3 ./manage.py runserver
 ```
 
-# Container
+# Container build
 Note: Installing Google Cloud SDK on local machine is recommended.
 Instructions are at https://cloud.google.com/sdk/docs/install#rpm
 
@@ -232,6 +253,9 @@ $ gcloud container images add-tag --quiet \
   gcr.io/$GOOGLE_CLOUD_PROJECT/waste.d:<SHA-1 of image here> \
   gcr.io/$GOOGLE_CLOUD_PROJECT/waste.d:latest
 ```
+
+# Cloud Run
+**Note**: Cloud Tasks is bound to App Engine app.
 
 ## Deploy: Create Cloud Run service
 Create a new Google Cloud Run service with given image:

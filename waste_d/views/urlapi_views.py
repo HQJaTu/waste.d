@@ -88,7 +88,7 @@ class API(APIView):
             if id < 1000:
                 id = DEFAULT_COUNTER_NAME + str(id)
                 # logging.debug('%s' % id)
-        except:
+        except Exception:
             pattern1 = r'^[A-Z]{1}$'
             pattern2 = r'^[A-Z]{2}$'
             if re.match(pattern1, id):
@@ -132,11 +132,11 @@ class API(APIView):
                 idx = data.get('index', 'url')
                 try:
                     limit = int(data.get('limit', 5))
-                except:
+                except Exception:
                     limit = 5
                 try:
                     offset = int(data.get('offset', 0))
-                except:
+                except Exception:
                     offset = 0
                 logging.debug('channel: %s, content: %s' % (channel, content))
             except Exception as e:
@@ -230,7 +230,7 @@ class API(APIView):
 
         try:
             id = int(id)
-        except:
+        except Exception:
             pass
         channelurl = ChannelUrl.get_by_id(id)
         if not channelurl:
@@ -300,7 +300,7 @@ class API(APIView):
 
         try:
             id = int(id)
-        except:
+        except Exception:
             pass
         channelurl = ChannelUrl.get_by_id(id)
         if not channelurl:

@@ -24,8 +24,8 @@ def module_init():
         'GOOGLE_CLOUD_PROJECT',
         'GOOGLE_APPLICATION_CREDENTIALS',
         'GCP_RUN_HOSTS',
-        'GCP_REGION'
         'GCP_STATIC_URL',
+        'GCP_TASKS_REGION'
     ]
     if 'DJANGO_ENV' not in os.environ:
         settings_file = '.env'
@@ -37,8 +37,8 @@ def module_init():
             settings_allowed = [
                 'PYTHONUNBUFFERED',
                 'GCP_RUN_HOSTS',
-                'GCP_REGION',
                 'GCP_STATIC_URL',
+                'GCP_TASKS_REGION'
             ]
     if os.path.isfile(settings_file):
         with open(settings_file) as f:

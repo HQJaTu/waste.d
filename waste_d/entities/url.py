@@ -8,6 +8,8 @@ from lxml import etree
 from django.utils.encoding import smart_text
 from waste_d.models.ndb.url_models import Url, Channel, ChannelUrl, Post, Extra
 from waste_d.models import Counter, News
+from django_cloud_tasks import remote_task, batch_execute
+from waste_d.tasks.document import QUEUE_DOCUMENT
 
 
 class UrlLogic:
@@ -97,10 +99,10 @@ class UrlLogic:
             old_post = Post.query(Post.channelurl == channelurlinstance.key).order(Post.date).get()
             try:
                 old_date = old_post.date.strftime("%d.%m.%y %H:%M")
-            except:
+            except Exception:
                 try:
                     old_date = old_post.idate.strftime("%d.%m.%y %H:%M")
-                except:
+                except Exception:
                     old_date = ''
             old_user = old_post.user
 
@@ -139,7 +141,7 @@ class UrlLogic:
                 news.link_text = url_title or self.url
                 news.put()
                 # logging.debug('News updated')
-            except:
+            except Exception:
                 logging.warning('News update failed')
         else:
             logging.info('News not updated, private channel/old url')
@@ -148,9 +150,9 @@ class UrlLogic:
             url_title = ''.join(self.url.split('/')[-1:])
         # logging.debug('Title: %s' % (url_title))
 
+        # Create Document (Cloud Search API)
+        doc_id = urlinstance.key.id()
         """
-        # Create Document (FullTextSearch)
-        doc_id = str(urlinstance.key.id())
         try:
             doc = search.Document(doc_id=doc_id, fields=[
                 search.TextField(name='channel', value=channel),
@@ -165,18 +167,26 @@ class UrlLogic:
         except Exception as e:
             logging.error('Error %s' % (e))
         # logging.debug('Document fields updated')
+        """
 
-        if urlinstance.document_date:
+        if not urlinstance.document_date:
+            # NDB has no date for this document, let's process it!
+            document_task = remote_task(queue=QUEUE_DOCUMENT, handler='waste_d.tasks.document.post')
+            task_args = {
+                'doc_id': doc_id
+            }
+
             try:
-                taskqueue.add(name=doc_id + '_post', queue_name='document', url='/tasks/update_document',
-                              params={'doc_id': doc_id})
-            except taskqueue.TombstonedTaskError:
-                logging.warning('TombstonedTaskError %s_post' % (doc_id))
-            except taskqueue.TaskAlreadyExistsError:
-                logging.warning('TaskAlreadyExistsError %s_post' % (doc_id))
-            except:
-                logging.critical('Something weird happened')
+                #document_task(payload=task_args).execute()
+                payload_1 = document_task(payload=task_args)
 
+                # Execute in batch:
+                batch_execute([payload_1])
+            except Exception as e:
+                logging.critical('Something weird happened. Exception: %s' % e)
+
+        """
+        # Update document (Cloud Search API)
         try:
             search.Index(name='url').put(doc)
             urlinstance.document_date = datetime.datetime.now()
@@ -190,7 +200,7 @@ class UrlLogic:
                 logging.warning('TombstonedTaskError %s_retry' % (doc_id))
             except taskqueue.TaskAlreadyExistsError:
                 logging.warning('TaskAlreadyExistsError %s_retry' % (doc_id))
-            except:
+            except Exception:
                 logging.critical('Something weird happened, again?')
         """
 

@@ -78,6 +78,7 @@ INSTALLED_APPS = [
     'django_extensions',
     'rest_framework',
     'rest_framework.authtoken',
+    'django_cloud_tasks',
     # Own ones:
     'waste_d.apps.WastedConfig',
 ]
@@ -184,27 +185,26 @@ else:
         "%s/static" % BASE_DIR,
     ]
 
-
-# Query for region?
-if 'GCP_REGION' not in os.environ and os.environ['DJANGO_ENV'] == DJANGO_ENV_PROD:
-    # Debug output environment:
-    #for env_var in os.environ:
-    #    log.error("error Env: '%s' = '%s'" % (env_var, os.environ[env_var]))
-    #    log.info("info Env: '%s' = '%s'" % (env_var, os.environ[env_var]))
-
-    # For metadata requests, see: https://cloud.google.com/compute/docs/storing-retrieving-metadata
-    import requests
-
-    meta_url = 'http://metadata.google.internal/computeMetadata/v1/instance/zone'
-    headers = {
-        'Metadata-Flavor': 'Google'
+# Tasks:
+# Note: All tasks will point to given URL. Additional handler-argument will identify actual task.
+if os.environ['GCP_TASKS_REGION']:
+    DJANGO_CLOUD_TASKS = {
+        'project_location_name': 'projects/%s/locations/%s' % (
+            os.environ['GOOGLE_CLOUD_PROJECT'], os.environ['GCP_TASKS_REGION']
+        ),
+        'task_handler_root_url': '/_tasks/',
     }
-    r = requests.get(meta_url, headers=headers)
-    r.raise_for_status()
-    match = re.search(r'^projects/\d+/zones/(\w+-\w+)-(\d)', r.text)
-    if match:
-        os.environ['GCP_REGION'] = match.group(1)
-        log.info('[%d] (info) Region is: %s' % (pid, os.environ['GCP_REGION']))
-        log.error('[%d] (error) Region is: %s' % (pid, os.environ['GCP_REGION']))
-    else:
-        raise Exception("Cannot determine region from '%s'. Stop." % r.text)
+    DJANGO_CLOUD_TASKS_EXECUTE_LOCALLY = False
+    DJANGO_CLOUD_TASKS_REGION = os.environ['GCP_TASKS_REGION']
+else:
+    DJANGO_CLOUD_TASKS = {
+        'project_location_name': '',
+        'task_handler_root_url': '/_tasks/',
+    }
+    # This setting allows you to debug your cloud tasks by running actual task handler function locally
+    # instead of sending them to the task queue. Default: False
+    DJANGO_CLOUD_TASKS_EXECUTE_LOCALLY = True
+
+# If False, running `.execute()` on remote task will simply log the task data instead of adding it to
+# the queue. Useful for debugging. Default: True
+DJANGO_CLOUD_TASKS_BLOCK_REMOTE_TASKS = False

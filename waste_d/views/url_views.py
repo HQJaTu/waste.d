@@ -83,7 +83,7 @@ def view(request, urlid):
     logging.debug('View ChannelUrl %s' % (urlid))
     try:
         urlid = int(urlid)
-    except:
+    except Exception:
         pass
 
     channelurl = ChannelUrl.get_by_id(urlid)
@@ -115,7 +115,7 @@ def view_master(request, urlid):
     logging.debug('View (Master)Url %s' % (urlid))
     try:
         urlid = int(urlid)
-    except:
+    except Exception:
         pass
 
     url = Url.get_by_id(urlid)
