@@ -269,6 +269,7 @@ gcloud run deploy waste-d \
   --service-account <service-account@created-earlier> \
   --update-env-vars GOOGLE_CLOUD_PROJECT=$GOOGLE_CLOUD_PROJECT \
   --update-env-vars GCP_RUN_HOSTS=<waste-d-something-lz.a.run.app> \
+  --update-env-vars GCP_TASKS_REGION=europe-west3 \
   --update-env-vars DJANGO_ENV=production
 ```
 

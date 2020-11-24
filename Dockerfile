@@ -12,6 +12,7 @@ COPY static .
 COPY manage.py .
 COPY gunicorn_config.py .
 COPY setup.py .
+COPY django_cloud_tasks django_cloud_tasks/
 
 # Install packages needed by dependencies.
 RUN apt-get update && apt-get -y install default-libmysqlclient-dev build-essential
