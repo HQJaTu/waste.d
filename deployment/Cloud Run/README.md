@@ -271,7 +271,20 @@ gcloud run deploy waste-d \
   --update-env-vars GOOGLE_CLOUD_PROJECT=$GOOGLE_CLOUD_PROJECT \
   --update-env-vars GCP_RUN_HOSTS=<waste-d-something-lz.a.run.app> \
   --update-env-vars GCP_TASKS_REGION=europe-west3 \
+  --update-env-vars GCP_TASKS_SERVICE_ACCOUNT=<service-account@created-earlier> \
   --update-env-vars DJANGO_ENV=production
+```
+
+After creation figure out the hostname:
+```bash
+$ gcloud run services list --platform managed
+```
+
+Update it to:
+```bash
+gcloud run deploy waste-d \
+  --platform managed --region europe-north1 \
+  --update-env-vars GCP_TASKS_SERVICE_URL_HOST=<cloud-run-service-to-create->
 ```
 
 Docs: https://cloud.google.com/sdk/gcloud/reference/run/deploy

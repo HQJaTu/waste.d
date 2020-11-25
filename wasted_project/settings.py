@@ -60,7 +60,9 @@ response = client.access_secret_version(request={"name": secret_path})
 SECRET_KEY = response.payload.data.decode("UTF-8")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+if os.environ['DJANGO_ENV'] == DJANGO_ENV_DEV:
+    DEBUG = True
+    # When DEBUG is True and ALLOWED_HOSTS is empty, the host is validated against ['.localhost', '127.0.0.1', '[::1]'].
 
 ALLOWED_HOSTS = []
 if "GCP_RUN_HOSTS" in os.environ:
