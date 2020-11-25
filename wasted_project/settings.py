@@ -214,4 +214,6 @@ DJANGO_CLOUD_TASKS_BLOCK_REMOTE_TASKS = False
 
 # Security:
 # If defined, this string is added into a request. Handler expects to have matching value in a request.
-#DJANGO_CLOUD_TASKS_HANDLER_SECRET
+secret_path = "projects/%s/secrets/%s/versions/latest" % (os.environ['GOOGLE_CLOUD_PROJECT'], 'cloud-tasks-secret_key')
+response = client.access_secret_version(request={"name": secret_path})
+DJANGO_CLOUD_TASKS_HANDLER_SECRET = response.payload.data.decode("UTF-8")

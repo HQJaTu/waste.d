@@ -142,6 +142,14 @@ $ apg -n 1 -a 1 -m 50 | \
   gcloud secrets create "django-secret_key" --data-file=-
 ```
 
+## Create Django Cloud Tasks secret key
+Generate a random password of 50 characters, and store it without trailing newline:
+```bash
+$ apg -n 1 -a 1 -m 50 | \
+  tr -d '\n' | \
+  gcloud secrets create "cloud-tasks-secret_key" --data-file=-
+```
+
 # Cloud Storage
 
 ## Create bucket
