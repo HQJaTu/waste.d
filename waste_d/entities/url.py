@@ -11,6 +11,8 @@ from waste_d.models import Counter, News
 from django_cloud_tasks import remote_task, batch_execute
 from waste_d.tasks.document import QUEUE_DOCUMENT
 
+log = logging.getLogger(__name__)
+
 
 class UrlLogic:
     today = datetime.date.today()
@@ -57,6 +59,7 @@ class UrlLogic:
         #  a) already exists
         #  b) ChannelCheck
         # 1. tarkista onko olemassa jo ko. Url, lisää jos ei, muuten päivitä (udate, valid?): valid-juttu joo ehkä jos tarpeen, ei muuten
+        log.error("XXX 1")
         urlquery = Url.query(Url.url == self.url)
         urlinstance = urlquery.get()
         if not urlinstance:
@@ -67,6 +70,7 @@ class UrlLogic:
             logging.info('Old url %s' % (self.url))
 
         # 2. tarkista onko olemassa jo ko. Channel, lisää jos ei
+        log.error("XXX 2")
         channelquery = Channel.query(Channel.name == self.channel)
         channelinstance = channelquery.get()
         if not channelinstance:
@@ -79,6 +83,7 @@ class UrlLogic:
             logging.info('New channel %s' % self.channel)
 
         # 3. tarkista onko url jo olemassa channel-tasolla
+        log.error("XXX 3")
         channelurlquery = ChannelUrl.query(ChannelUrl.url == urlinstance.key,
                                            ChannelUrl.channel == channelinstance.key)
         channelurlinstance = channelurlquery.get()
@@ -107,6 +112,7 @@ class UrlLogic:
             old_user = old_post.user
 
         # 4. Lisätään postaus (tarkistetaan ettei ole jo)
+        log.error("XXX 4")
         postquery = Post.query(Post.channelurl == channelurlinstance.key,
                                Post.user == self.user, Post.date == self.date)
         postinstance = postquery.get()
@@ -131,6 +137,7 @@ class UrlLogic:
                     comment = None
 
         # Go do some HTTP-requesting
+        log.error("XXX get")
         url_title = self._get_url(urlinstance)
 
         # Update News
@@ -169,8 +176,10 @@ class UrlLogic:
         # logging.debug('Document fields updated')
         """
 
+        log.error("XXX task.1")
         if not urlinstance.document_date:
             # NDB has no date for this document, let's process it!
+            log.error("XXX task.2")
             document_task = remote_task(queue=QUEUE_DOCUMENT, handler='waste_d.tasks.document.post',
                                         http_service_account=True)
             task_args = {
@@ -182,7 +191,9 @@ class UrlLogic:
                 payload_1 = document_task(payload=task_args)
 
                 # Execute in batch:
+                log.error("XXX task.3")
                 batch_execute([payload_1])
+                log.error("XXX task.4")
             except Exception as e:
                 logging.critical('Something weird happened. Exception: %s' % e)
 
@@ -204,6 +215,7 @@ class UrlLogic:
             except Exception:
                 logging.critical('Something weird happened, again?')
         """
+        log.error("XXX done")
 
         return channelinstance
 
