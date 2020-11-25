@@ -28,8 +28,11 @@ def run_task(request):
         'taskRequestHeaders': dict(request_headers)
     }
     try:
-        if not handler_key == DCTConfig.handler_secret():
-            raise ValueError('API key mismatch')
+        if DCTConfig.handler_secret():
+            if not handler_key:
+                raise ValueError("API key mismatch")
+            if not handler_key == DCTConfig.handler_secret():
+                raise ValueError("API key mismatch")
 
         internal_task_name = body['internal_task_name']
         data = body.get('data', dict())

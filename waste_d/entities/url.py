@@ -171,7 +171,8 @@ class UrlLogic:
 
         if not urlinstance.document_date:
             # NDB has no date for this document, let's process it!
-            document_task = remote_task(queue=QUEUE_DOCUMENT, handler='waste_d.tasks.document.post')
+            document_task = remote_task(queue=QUEUE_DOCUMENT, handler='waste_d.tasks.document.post',
+                                        http_service_account=True)
             task_args = {
                 'doc_id': doc_id
             }

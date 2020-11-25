@@ -192,7 +192,8 @@ if os.environ['GCP_TASKS_REGION']:
         'project_location_name': 'projects/%s/locations/%s' % (
             os.environ['GOOGLE_CLOUD_PROJECT'], os.environ['GCP_TASKS_REGION']
         ),
-        'task_handler_root_url': '/_tasks/',
+        'task_handler_root_url': 'https://%s/_tasks/' % os.environ['GCP_TASKS_SERVICE_URL_HOST'],
+        'http_service_account': os.environ['GCP_TASKS_SERVICE_ACCOUNT']
     }
     DJANGO_CLOUD_TASKS_EXECUTE_LOCALLY = False
     DJANGO_CLOUD_TASKS_REGION = os.environ['GCP_TASKS_REGION']
@@ -208,3 +209,7 @@ else:
 # If False, running `.execute()` on remote task will simply log the task data instead of adding it to
 # the queue. Useful for debugging. Default: True
 DJANGO_CLOUD_TASKS_BLOCK_REMOTE_TASKS = False
+
+# Security:
+# If defined, this string is added into a request. Handler expects to have matching value in a request.
+#DJANGO_CLOUD_TASKS_HANDLER_SECRET

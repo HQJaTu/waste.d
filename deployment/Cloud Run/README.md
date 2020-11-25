@@ -77,8 +77,9 @@ Go to Project's _API & API settings_, _Credentials_, _Service Accounts_.
   * _Cloud Run Invoker_
   * _Datastore User_
   * _Secret Manager Secret Accessor_
-  * _App Engine Viewer_
-  * _Cloud Tasks Enqueuer_
+  * _App Engine Viewer_: for metadata requests
+  * _Cloud Tasks Enqueuer_: for adding new jobs to task queue
+  * _Service Account User_: for adding new jobs to task queue
 * Service account ID: `<default is ok>`
 * Key Type: _JSON_
 

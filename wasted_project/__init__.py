@@ -25,7 +25,9 @@ def module_init():
         'GOOGLE_APPLICATION_CREDENTIALS',
         'GCP_RUN_HOSTS',
         'GCP_STATIC_URL',
-        'GCP_TASKS_REGION'
+        'GCP_TASKS_REGION',
+        'GCP_TASKS_SERVICE_ACCOUNT',
+        'GCP_TASKS_SERVICE_URL_HOST',
     ]
     if 'DJANGO_ENV' not in os.environ:
         settings_file = '.env'
@@ -38,7 +40,9 @@ def module_init():
                 'PYTHONUNBUFFERED',
                 'GCP_RUN_HOSTS',
                 'GCP_STATIC_URL',
-                'GCP_TASKS_REGION'
+                'GCP_TASKS_REGION',
+                'GCP_TASKS_SERVICE_ACCOUNT',
+                'GCP_TASKS_SERVICE_URL_HOST',
             ]
     if os.path.isfile(settings_file):
         with open(settings_file) as f:

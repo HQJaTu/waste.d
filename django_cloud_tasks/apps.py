@@ -42,3 +42,7 @@ class DCTConfig(AppConfig):
     @classmethod
     def region(cls):
         return getattr(settings, 'DJANGO_CLOUD_TASKS_REGION', None)
+
+    @classmethod
+    def http_service_account(cls):
+        return cls._settings().get('http_service_account')
