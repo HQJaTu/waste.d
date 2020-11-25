@@ -63,6 +63,8 @@ SECRET_KEY = response.payload.data.decode("UTF-8")
 if os.environ['DJANGO_ENV'] == DJANGO_ENV_DEV:
     DEBUG = True
     # When DEBUG is True and ALLOWED_HOSTS is empty, the host is validated against ['.localhost', '127.0.0.1', '[::1]'].
+elif 'DEBUG' in os.environ:
+    DEBUG = True
 
 ALLOWED_HOSTS = []
 if "GCP_RUN_HOSTS" in os.environ:
