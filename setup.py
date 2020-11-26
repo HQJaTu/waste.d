@@ -14,7 +14,7 @@ setup(
         'django-extensions',
         'djangorestframework',
         'django-mysql',
-        'mysqlclient',
+        'mysqlclient>=2.0',
         'google-cloud-core',
         'google-api-core>=1.19.0',
         'google-cloud-ndb',
