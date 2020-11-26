@@ -23,7 +23,6 @@ class API(APIView):
     @parser_classes((JSONParser,))
     def post(self, request):
 
-        logger.error("XXX begin")
         url = None
         url_title = None
         channel = None
@@ -53,7 +52,6 @@ class API(APIView):
 
             return HttpResponse(retval, content_type="application/json")
 
-        logger.error("XXX 1")
         urllogic = UrlLogic(url, channel, user, date, line)
         channelurlinstance = urllogic.get()
 
@@ -62,8 +60,6 @@ class API(APIView):
         retval = json.dumps(
             {'id': channelurlinstance.key.id(), 'title': url_title, 'old': old_url, 'old_user': old_user,
              'old_date': old_date})
-
-        logger.error("XXX end")
 
         return HttpResponse(retval, content_type="application/json")
 
