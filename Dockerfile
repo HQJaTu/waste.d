@@ -35,8 +35,8 @@ RUN adduser --disabled-password --uid 999 --gecos "App User" app-user
 COPY --from=compile-image /root/.local /home/app-user/.local
 RUN chmod -R a+r /home/app-user/.local/lib/python3.8/site-packages/ ; find /home/app-user/.local/lib/python3.8/site-packages/ -type d -exec chmod a+x {} \;
 # Note: lib.so -files have symlinks!
-COPY --from=compile-image /usr/lib/x86_64-linux-gnu/libmysqlclient*.s* /usr/lib/x86_64-linux-gnu
-COPY --from=compile-image /usr/lib/x86_64-linux-gnu/libmariadb*.s* /usr/lib/x86_64-linux-gnu
+COPY --from=compile-image /usr/lib/x86_64-linux-gnu/libmysqlclient*.s* /usr/lib/x86_64-linux-gnu/
+COPY --from=compile-image /usr/lib/x86_64-linux-gnu/libmariadb*.s* /usr/lib/x86_64-linux-gnu/
 ENV PATH=/home/app-user/.local/bin:$PATH
 
 # Copy local code to the container image.
