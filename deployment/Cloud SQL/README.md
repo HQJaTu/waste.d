@@ -48,6 +48,9 @@ Note: Instance will exist for a week after deletion.
 Error:
 Invalid request: Incorrect Service Networking config for instance: NETWORK_NOT_PEERED.
 
+## Take a record of the private IPv4 address assigned
+The IP-address will be needed for VPC-connection from Cloud Run.
+
 ## Create a database
 ```bash
 $ gcloud sql databases create waste.d --instance=waste-d --collation=utf8_general_ci

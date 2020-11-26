@@ -123,7 +123,7 @@ WSGI_APPLICATION = 'wasted_project.wsgi.application'
 
 secret_path = "projects/%s/secrets/%s/versions/latest" % (os.environ['GOOGLE_CLOUD_PROJECT'], 'mysql-app-user')
 response = client.access_secret_version(request={"name": secret_path})
-mysql_hostname = '68.171.228.35.bc.googleusercontent.com'
+mysql_hostname = os.environ['MYSQL_HOST']
 mysql_database = 'waste.d'
 mysql_user = 'wappd'
 mysql_password = response.payload.data.decode("UTF-8")
