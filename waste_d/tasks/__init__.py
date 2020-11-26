@@ -7,4 +7,4 @@ from .document import DocumentTask
 #from .valid import ValidTask
 
 QUEUE_MAINTENANCE = 'maintenance'
-QUEUE_URLFETCH = 'urlfetch-d'
+QUEUE_URLFETCH = 'urlfetch'

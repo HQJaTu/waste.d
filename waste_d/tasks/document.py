@@ -14,7 +14,7 @@ from waste_d.models import Url, Channel, ChannelUrl, Post, Rate, Extra, News
 
 log = logging.getLogger(__name__)
 
-QUEUE_DOCUMENT = 'document-d'
+QUEUE_DOCUMENT = 'document'
 
 
 class DocumentTask:
