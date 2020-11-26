@@ -34,7 +34,6 @@ RUN adduser --disabled-password --uid 999 --gecos "App User" app-user
 # Copy pre-compiled stuff
 COPY --from=compile-image /root/.local /home/app-user/.local
 RUN chmod -R a+r /home/app-user/.local/lib/python3.8/site-packages/ ; find /home/app-user/.local/lib/python3.8/site-packages/ -type d -exec chmod a+x {} \;
-#COPY --from=compile-image /usr/local/lib/python3.8/site-packages /usr/local/lib/python3.8/
 ENV PATH=/home/app-user/.local/bin:$PATH
 
 # Copy local code to the container image.
