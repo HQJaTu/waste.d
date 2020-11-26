@@ -23,6 +23,7 @@ def module_init():
         'PYTHONUNBUFFERED',
         'GOOGLE_CLOUD_PROJECT',
         'GOOGLE_APPLICATION_CREDENTIALS',
+        'MYSQL_HOST',
         'GCP_RUN_HOSTS',
         'GCP_STATIC_URL',
         'GCP_TASKS_REGION',
@@ -36,14 +37,12 @@ def module_init():
         if not os.path.isfile(settings_file) and os.path.isfile('.env'):
             settings_file = '.env'
         if os.environ['DJANGO_ENV'] == DJANGO_ENV_PROD:
-            settings_allowed = [
-                'PYTHONUNBUFFERED',
-                'GCP_RUN_HOSTS',
-                'GCP_STATIC_URL',
-                'GCP_TASKS_REGION',
-                'GCP_TASKS_SERVICE_ACCOUNT',
-                'GCP_TASKS_SERVICE_URL_HOST',
+            settings_not_allowed = [
+                'GOOGLE_CLOUD_PROJECT',
+                'GOOGLE_APPLICATION_CREDENTIALS',
             ]
+            for setting in settings_not_allowed:
+                settings_allowed.remove(setting)
     if os.path.isfile(settings_file):
         with open(settings_file) as f:
             for line in f:
