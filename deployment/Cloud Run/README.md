@@ -19,7 +19,7 @@ $ gcloud services enable secretmanager.googleapis.com
 $ gcloud services enable sqladmin.googleapis.com
 $ gcloud services enable servicenetworking.googleapis.com
 $ gcloud services enable cloudtasks.googleapis.com
-$ gcloud services enable cloudsearch.googleapis.com
+$ gcloud services enable bigquery.googleapis.com
 ```
 
 # VPC
@@ -80,6 +80,7 @@ Go to Project's _API & API settings_, _Credentials_, _Service Accounts_.
   * _App Engine Viewer_: for metadata requests
   * _Cloud Tasks Enqueuer_: for adding new jobs to task queue
   * _Service Account User_: for adding new jobs to task queue
+  * _BigQuery Data Editor_: for accessing BQ datasets and table data
 * Service account ID: `<default is ok>`
 * Key Type: _JSON_
 

@@ -219,3 +219,6 @@ DJANGO_CLOUD_TASKS_BLOCK_REMOTE_TASKS = False
 secret_path = "projects/%s/secrets/%s/versions/latest" % (os.environ['GOOGLE_CLOUD_PROJECT'], 'cloud-tasks-secret_key')
 response = client.access_secret_version(request={"name": secret_path})
 DJANGO_CLOUD_TASKS_HANDLER_SECRET = response.payload.data.decode("UTF-8")
+
+# Big Query dataset
+BG_DATASET_ID = 'wasted_prod'

@@ -23,6 +23,7 @@ setup(
         'google-cloud-tasks>=2.0',
         'google-api-python-client>=1.12.0',
         'google-auth-oauthlib',
+        'google-cloud-bigquery',
         'lxml',
         'gunicorn>=20.0.4',
         'requests',

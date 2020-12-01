@@ -10,7 +10,7 @@ from waste_d.models.ndb.url_models import Url, Channel, ChannelUrl, Post, Extra
 from waste_d.models import Counter, News
 from django_cloud_tasks import remote_task, batch_execute
 from waste_d.tasks.document import QUEUE_DOCUMENT
-
+from waste_d.bq_models import Links
 log = logging.getLogger(__name__)
 
 
@@ -51,6 +51,8 @@ class UrlLogic:
         orig_url = self.url
 
         today = datetime.date.today()
+
+        links = Links()
 
         # Originally all URLs were fetched.
         # Not fetching an existing URL.
@@ -153,8 +155,8 @@ class UrlLogic:
         # logging.debug('Title: %s' % (url_title))
 
         # Create Document (Cloud Search API)
+        # Update Document in either case.
         doc_id = urlinstance.key.id()
-        """
         try:
             doc = search.Document(doc_id=doc_id, fields=[
                 search.TextField(name='channel', value=channel),
@@ -169,7 +171,6 @@ class UrlLogic:
         except Exception as e:
             logging.error('Error %s' % (e))
         # logging.debug('Document fields updated')
-        """
 
         if not urlinstance.document_date:
             # NDB has no date for this document, let's process it!
@@ -188,8 +189,11 @@ class UrlLogic:
             except Exception as e:
                 logging.critical('Something weird happened. Exception: %s' % e)
 
-        """
         # Update document (Cloud Search API)
+
+        return channelinstance
+
+    def update_document(self, doc):
         try:
             search.Index(name='url').put(doc)
             urlinstance.document_date = datetime.datetime.now()
@@ -205,9 +209,7 @@ class UrlLogic:
                 logging.warning('TaskAlreadyExistsError %s_retry' % (doc_id))
             except Exception:
                 logging.critical('Something weird happened, again?')
-        """
 
-        return channelinstance
 
     @staticmethod
     def _get_counter_name_for_now():
