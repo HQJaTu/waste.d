@@ -1,37 +1,60 @@
-from google.cloud.bigquery import SchemaField
+from google.cloud import bigquery
 from .abstract.model import BQModel
+from .abstract.fields import *
 
 
 class Links(BQModel):
-    _table_name = 'links'
-    _schema = [
-        # SchemaField('_PARTITIONTIME', 'TIMESTAMP', mode='required'),
-        SchemaField('platform', 'STRING', mode='required'),
-        SchemaField('chat', 'STRING'),
-        SchemaField('channel', 'STRING', mode='required'),
-        SchemaField('user', 'STRING', mode='required'),
-        SchemaField('url', 'STRING', mode='required'),
-        SchemaField('date', 'DATETIME'),
-        SchemaField('title', 'STRING'),
-        SchemaField('comment', 'STRING'),
-        SchemaField('tags', 'RECORD', mode='nullable',
-                    fields=(
-                        SchemaField('tag', 'STRING'),
-                    )),
-        SchemaField('rate', 'INT64'),
-    ]
+    _PARTITIONTIME = BQPartitionTimestampField()
+    doc_id = BQStringField(mode='required')
+    platform = BQStringField(mode='required')
+    chat = BQStringField()
+    channel = BQStringField(mode='required')
+    user = BQStringField(mode='required')
+    url = BQStringField(mode='required')
+    date = BQDatetimeField()
+    title = BQStringField()
+    comment = BQStringField()
+    tags = BQRecordField(
+        mode='REPEATED',
+        fields=(
+            BQStringField(name='tag'),
+        )
+    )
+    rate = BQIntegerField()
 
-    def __init__(self, client=None, dataset_id=None):
-        print("Links __init__ going for super()!")
-        super(Links, self).__init__(client=client, dataset_id=dataset_id)
-        self.table = self.dataset.table(Links._table_name)
+    def find_by_doc_id(self, doc_id):
+        query = """select *
+from `waste_d_links`
+where doc_id = @docid"""
+        result = self.query(query, params={'docid': doc_id})
+        if result.total_rows != 0:
+            return False
+        BQModel.row_to_model(self, result[0])
 
-        print("Links __init__!")
-        from pprint import pprint
-        pprint(self._data)
+        return True
 
-    def insert(self):
-        errors = self.client.insert_rows(self._table_name, rows_to_insert)
-        if not errors == []:
-            print(errors)
-            raise ValueError('Failed to insert data into BigQuery!')
+    def get_by_url(self, platform, chat, channel, url):
+        if not chat:
+            chat = ''
+        query = """select *
+from `waste_d_links`
+where platform = @platform
+and chat = @chat
+and channel = @channel
+and url = @url"""
+        qp = {
+            'platform': platform,
+            'chat': chat,
+            'channel': channel,
+            'url': url,
+        }
+
+        result = self.query(query, params=qp)
+
+        rows = []
+        for row in result:
+            link = Links()
+            BQModel.row_to_model(link, row)
+            rows.append(link)
+
+        return rows

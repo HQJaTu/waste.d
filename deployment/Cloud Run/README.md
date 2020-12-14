@@ -81,6 +81,7 @@ Go to Project's _API & API settings_, _Credentials_, _Service Accounts_.
   * _Cloud Tasks Enqueuer_: for adding new jobs to task queue
   * _Service Account User_: for adding new jobs to task queue
   * _BigQuery Data Editor_: for accessing BQ datasets and table data
+  * _BigQuery Job User_: for accessing BQ datasets and table data
 * Service account ID: `<default is ok>`
 * Key Type: _JSON_
 

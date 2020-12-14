@@ -11,6 +11,7 @@ from rest_framework.decorators import parser_classes
 from rest_framework.parsers import JSONParser
 from waste_d.models.ndb.url_models import Url, Channel, ChannelUrl, Rate, Extra
 from waste_d.entities.url import UrlLogic
+from waste_d.bq_models import Links
 
 logger = logging.getLogger(__name__)
 
@@ -19,12 +20,20 @@ class API(APIView):
     authentication_classes = [authentication.TokenAuthentication]
     permission_classes = [permissions.IsAuthenticated]
 
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        # Make sure GCP BQ-client is alive for later access.
+        links = Links()
+        links.get_dataset()
+
     @never_cache
     @parser_classes((JSONParser,))
     def post(self, request):
 
         url = None
         url_title = None
+        platform = None
+        chat = None
         channel = None
         user = None
         line = None
@@ -39,6 +48,12 @@ class API(APIView):
 
         try:
             url = request.data.get('url')
+            platform = request.data.get('platform').lower()
+            chat = request.data.get('chat')
+            if not chat:
+                chat = None
+            else:
+                chat = chat.lower()
             channel = request.data.get('channel').lower()
             user = request.data.get('user')
             line = request.data.get('line')
@@ -52,7 +67,7 @@ class API(APIView):
 
             return HttpResponse(retval, content_type="application/json")
 
-        urllogic = UrlLogic(url, channel, user, date, line)
+        urllogic = UrlLogic(url, platform, chat, channel, user, date, line)
         channelurlinstance = urllogic.get()
 
         # Finally: return status and/or title (+something)

@@ -11,6 +11,7 @@ from waste_d.models import Counter, News
 from django_cloud_tasks import remote_task, batch_execute
 from waste_d.tasks.document import QUEUE_DOCUMENT
 from waste_d.bq_models import Links
+
 log = logging.getLogger(__name__)
 
 
@@ -23,6 +24,8 @@ class UrlLogic:
 
     url = None
     url_title = None
+    platform = None
+    chat = None
     channel = None
     user = None
     line = None
@@ -35,8 +38,10 @@ class UrlLogic:
     old_user = None
     old_date = None
 
-    def __init__(self, url, channel, user, date, line):
+    def __init__(self, url, platform, chat, channel, user, date, line):
         self.url = url
+        self.platform = platform
+        self.chat = chat
         self.channel = channel
         self.user = user
         self.date = date
@@ -157,20 +162,17 @@ class UrlLogic:
         # Create Document (Cloud Search API)
         # Update Document in either case.
         doc_id = urlinstance.key.id()
-        try:
-            doc = search.Document(doc_id=doc_id, fields=[
-                search.TextField(name='channel', value=channel),
-                search.TextField(name='user', value=user),
-                search.TextField(name='url', value=url),
-                search.DateField(name='date', value=date),
-                search.TextField(name='title', value=url_title),
-                search.TextField(name='comment', value=comment, language='fi'),
-                search.TextField(name='tag', value=tags, language='fi'),
-                search.NumberField(name='rate', value=0)
-            ], language='en')
-        except Exception as e:
-            logging.error('Error %s' % (e))
-        # logging.debug('Document fields updated')
+        existing = links.get_by_url(platform=self.platform, chat=self.chat, channel=self.channel, url=self.url)
+        if not existing:
+            links.doc_id = doc_id
+            links.platform = self.platform
+            links.channel = self.channel
+            links.user = self.user
+            links.url = self.url
+            links.date = self.date
+            links.title = None
+            links.comment = self.line
+            links.insert()
 
         if not urlinstance.document_date:
             # NDB has no date for this document, let's process it!
@@ -181,7 +183,7 @@ class UrlLogic:
             }
 
             try:
-                #document_task(payload=task_args).execute()
+                # document_task(payload=task_args).execute()
                 payload_1 = document_task(payload=task_args)
 
                 # Execute in batch:
@@ -192,24 +194,6 @@ class UrlLogic:
         # Update document (Cloud Search API)
 
         return channelinstance
-
-    def update_document(self, doc):
-        try:
-            search.Index(name='url').put(doc)
-            urlinstance.document_date = datetime.datetime.now()
-            urlinstance.put()
-        except search.Error:
-            logging.warning('Create Document failed.')
-            try:
-                taskqueue.add(name=doc_id + '_retry', queue_name='document', url='/tasks/update_document',
-                              params={'doc_id': doc_id})
-            except taskqueue.TombstonedTaskError:
-                logging.warning('TombstonedTaskError %s_retry' % (doc_id))
-            except taskqueue.TaskAlreadyExistsError:
-                logging.warning('TaskAlreadyExistsError %s_retry' % (doc_id))
-            except Exception:
-                logging.critical('Something weird happened, again?')
-
 
     @staticmethod
     def _get_counter_name_for_now():

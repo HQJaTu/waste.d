@@ -135,7 +135,7 @@ DATABASES = {
         'USER': mysql_user,
         'PASSWORD': mysql_password,
         'NAME': mysql_database,
-    }
+    },
 }
 
 # Password validation
