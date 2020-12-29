@@ -47,10 +47,9 @@ class API(APIView):
         old_user = None
         old_date = None
 
+        # Some parts are stored in API-key
         platform = request.auth.platform
         chat = request.auth.chat
-        if not chat:
-            chat = None
 
         try:
             url = request.data.get('url')
