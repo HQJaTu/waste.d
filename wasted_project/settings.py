@@ -73,6 +73,9 @@ if "GCP_RUN_HOSTS" in os.environ:
 # Application definition
 
 INSTALLED_APPS = [
+    # Own ones:
+    'waste_d',
+    # Boxed ones:
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -81,10 +84,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_extensions',
     'rest_framework',
-    'rest_framework.authtoken',
     'django_cloud_tasks',
-    # Own ones:
-    'waste_d.apps.WastedConfig',
 ]
 
 MIDDLEWARE = [
@@ -158,7 +158,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.TokenAuthentication',
+        'waste_d.authentication.WastedTokenAuthentication',
     ],
 }
 

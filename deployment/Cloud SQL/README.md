@@ -137,8 +137,7 @@ user.save()
 
 Auth token:
 ```bash
-$ GOOGLE_CLOUD_PROJECT=waste-007 \
-  GOOGLE_APPLICATION_CREDENTIALS=Waste-Google-service-account-credentials.json \
+$ DJANGO_ENV=Development \
   python3 manage.py drf_create_token eggdrop
 ```
 
@@ -146,14 +145,25 @@ $ GOOGLE_CLOUD_PROJECT=waste-007 \
 
 ## Create code for ORM migrations
 ```bash
-$ GOOGLE_CLOUD_PROJECT=waste-007 \
-  GOOGLE_APPLICATION_CREDENTIALS=Waste-Google-service-account-credentials.json \
+$ DJANGO_ENV=Development \
   python3 manage.py makemigrations
 ```
 
 ## Migrate SQL
 ```bash
-$ GOOGLE_CLOUD_PROJECT=waste-007 \
-  GOOGLE_APPLICATION_CREDENTIALS=Waste-Google-service-account-credentials.json \
-  python3 manage.py makemigrations
+$ DJANGO_ENV=Development \
+  python3 manage.py migrate
+```
+
+### Roll back migration
+Need to know what's the lates to keep. `zero` is nothing.
+```bash
+$ DJANGO_ENV=Development \
+  python3 manage.py showmigrations
+```
+
+Go reset!
+```bash
+$ DJANGO_ENV=Development \
+  python3 manage.py migrate --fake waste_d 0002_auto_20201117_1103
 ```

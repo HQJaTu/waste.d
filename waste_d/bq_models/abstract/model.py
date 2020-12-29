@@ -12,6 +12,10 @@ class BQModel(metaclass=ModelBase):
     bq_table = None
     bq_time_partitioning = None
 
+    # Meta options: https://docs.djangoproject.com/en/3.1/ref/models/options/
+    class Meta:
+        abstract = True
+
     def __init__(self, *args, dataset=None, client=None, **kwargs):
         # Alias some things as locals to avoid repeat global lookups
         cls = self.__class__

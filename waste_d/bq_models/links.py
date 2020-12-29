@@ -22,6 +22,10 @@ class Links(BQModel):
     )
     rate = BQIntegerField()
 
+    # Meta options: https://docs.djangoproject.com/en/3.1/ref/models/options/
+    class Meta:
+        abstract = True
+
     def find_by_doc_id(self, doc_id):
         query = """select *
 from `waste_d_links`

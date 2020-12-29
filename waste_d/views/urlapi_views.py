@@ -12,12 +12,13 @@ from rest_framework.parsers import JSONParser
 from waste_d.models.ndb.url_models import Url, Channel, ChannelUrl, Rate, Extra
 from waste_d.entities.url import UrlLogic
 from waste_d.bq_models import Links
+from waste_d.authentication import token_authentication
 
 logger = logging.getLogger(__name__)
 
 
 class API(APIView):
-    authentication_classes = [authentication.TokenAuthentication]
+    authentication_classes = [token_authentication.WastedTokenAuthentication]
     permission_classes = [permissions.IsAuthenticated]
 
     def __init__(self, **kwargs):
@@ -46,14 +47,13 @@ class API(APIView):
         old_user = None
         old_date = None
 
+        platform = request.auth.platform
+        chat = request.auth.chat
+        if not chat:
+            chat = None
+
         try:
             url = request.data.get('url')
-            platform = request.data.get('platform').lower()
-            chat = request.data.get('chat')
-            if not chat:
-                chat = None
-            else:
-                chat = chat.lower()
             channel = request.data.get('channel').lower()
             user = request.data.get('user')
             line = request.data.get('line')

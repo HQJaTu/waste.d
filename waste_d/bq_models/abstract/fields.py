@@ -242,6 +242,99 @@ class BQField(RegisterLookupMixin):
         from django.db.models.expressions import Col
         return Col(self.model._meta.db_table, self)
 
+    def deconstruct(self):
+        """
+        Return enough information to recreate the field as a 4-tuple:
+
+         * The name of the field on the model, if contribute_to_class() has
+           been run.
+         * The import path of the field, including the class:e.g.
+           django.db.models.IntegerField This should be the most portable
+           version, so less specific may be better.
+         * A list of positional arguments.
+         * A dict of keyword arguments.
+
+        Note that the positional or keyword arguments must contain values of
+        the following types (including inner values of collection types):
+
+         * None, bool, str, int, float, complex, set, frozenset, list, tuple,
+           dict
+         * UUID
+         * datetime.datetime (naive), datetime.date
+         * top-level classes, top-level functions - will be referenced by their
+           full import path
+         * Storage instances - these have their own deconstruct() method
+
+        This is because the values here must be serialized into a text format
+        (possibly new Python code, possibly JSON) and these are the only types
+        with encoding handlers defined.
+
+        There's no need to return the exact way the field was instantiated this
+        time, just ensure that the resulting field is the same - prefer keyword
+        arguments over positional ones, and omit parameters with their default
+        values.
+        """
+        # Short-form way of fetching all the default parameters
+        keywords = {}
+        possibles = {
+            "verbose_name": None,
+            "max_length": None,
+            "unique": False,
+            "blank": False,
+            "db_index": False,
+            "default": NOT_PROVIDED,
+            "editable": True,
+            "serialize": True,
+            "unique_for_date": None,
+            "unique_for_month": None,
+            "unique_for_year": None,
+            "help_text": '',
+            "db_column": None,
+            "db_tablespace": None,
+            "auto_created": False,
+            "validators": [],
+            "error_messages": None,
+        }
+        attr_overrides = {
+            "unique": "_unique",
+            "error_messages": "_error_messages",
+            "validators": "_validators",
+            "verbose_name": "_verbose_name",
+            "db_tablespace": "_db_tablespace",
+        }
+        equals_comparison = {"choices", "validators"}
+        for name, default in possibles.items():
+            value = getattr(self, attr_overrides.get(name, name))
+            # Do correct kind of comparison
+            if name in equals_comparison:
+                if value != default:
+                    keywords[name] = value
+            else:
+                if value is not default:
+                    keywords[name] = value
+        # Work out path - we shorten it for known Django core fields
+        path = "%s.%s" % (self.__class__.__module__, self.__class__.__qualname__)
+        if path.startswith("django.db.models.fields.related"):
+            path = path.replace("django.db.models.fields.related", "django.db.models")
+        elif path.startswith("django.db.models.fields.files"):
+            path = path.replace("django.db.models.fields.files", "django.db.models")
+        elif path.startswith('django.db.models.fields.json'):
+            path = path.replace('django.db.models.fields.json', 'django.db.models')
+        elif path.startswith("django.db.models.fields.proxy"):
+            path = path.replace("django.db.models.fields.proxy", "django.db.models")
+        elif path.startswith("django.db.models.fields"):
+            path = path.replace("django.db.models.fields", "django.db.models")
+        # Return basic info - other fields should override this.
+        return (self.name, path, [], keywords)
+
+    def clone(self):
+        """
+        Uses deconstruct() to clone a new copy of this Field.
+        Will not preserve any class attachments/attribute names.
+        """
+        name, path, args, kwargs = self.deconstruct()
+        return self.__class__(*args, **kwargs)
+
 
 class BQStringField(BQField):
     bq_type = 'STRING'
